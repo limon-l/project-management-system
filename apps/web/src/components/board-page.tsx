@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { useProjects } from "@/hooks/use-projects";
+import { useProject } from "@/hooks/use-projects";
 import {
   useProjectTasks,
   useProjectColumns,
@@ -28,6 +28,7 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
     useProjectTasks(projectId);
   const { data: columns = [], isLoading: columnsLoading } =
     useProjectColumns(projectId);
+  const { data: project } = useProject(workspaceId, projectId);
   const moveTask = useMoveTask(projectId);
   const createTask = useCreateTask(projectId);
 
@@ -71,8 +72,8 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
     <ProjectLayout
       projectId={projectId}
       workspaceId={workspaceId}
-      projectName="Project"
-      projectKey="PRJ"
+      projectName={project?.name ?? "Project"}
+      projectKey={project?.key ?? "PRJ"}
     >
       <div className="flex h-14 items-center border-b border-border px-6">
         <h1 className="text-lg font-semibold">Board</h1>
