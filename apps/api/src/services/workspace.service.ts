@@ -301,6 +301,14 @@ export async function changeMemberRole(
 
   member.role = newRole;
   await member.save();
+
+  emitToWorkspace(workspaceId, "workspace:member_updated", {
+    workspaceId,
+    memberId,
+    userId: member.userId.toString(),
+    role: newRole,
+  });
+
   logAudit({
     action: "workspace:member_role_changed",
     actorId: changedBy,
