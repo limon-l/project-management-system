@@ -108,22 +108,20 @@ export function Board({
       let newPosition: string;
 
       if (overIndex === -1) {
-        // Dropped at end of column
         const lastPos = columnTasks[columnTasks.length - 1]?.position;
         newPosition = lastPos
-          ? String(parseInt(lastPos) + 1000)
+          ? String(parseInt(lastPos) + 1000).padStart(7, "0")
           : "0001000";
       } else {
-        // Insert before/after the target task
         const prev = columnTasks[overIndex - 1];
         const curr = columnTasks[overIndex];
 
         if (prev) {
           newPosition = String(
             Math.floor((parseInt(prev.position) + parseInt(curr.position)) / 2)
-          );
+          ).padStart(7, "0");
         } else {
-          newPosition = String(Math.floor(parseInt(curr.position) / 2)) || "500";
+          newPosition = String(Math.floor(parseInt(curr.position) / 2)).padStart(7, "0") || "0000500";
         }
       }
 
