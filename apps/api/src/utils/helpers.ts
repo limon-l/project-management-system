@@ -98,10 +98,10 @@ export function midpointPosition(before: string, after: string): string {
   const a = parseInt(before, 10);
   const b = parseInt(after, 10);
   if (isNaN(a) || isNaN(b)) {
-    return String(Math.floor((a || 0) + 1));
+    return String(Math.floor((a || 0) + 1)).padStart(6, "0");
   }
   if (b - a <= 1) {
-    return String(a + 1);
+    return String(a + 1).padStart(6, "0");
   }
-  return String(Math.floor((a + b) / 2));
+  return String(Math.floor((a + b) / 2)).padStart(6, "0");
 }
