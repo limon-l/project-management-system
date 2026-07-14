@@ -5,6 +5,10 @@ import {
   Column,
   Task,
   WorkspaceMember,
+  Comment,
+  Attachment,
+  ChecklistItem,
+  TaskDependency,
 } from "../models/index.js";
 import { AppError, validate, slugify, generatePosition } from "../utils/helpers.js";
 import {
@@ -141,6 +145,21 @@ export async function deleteProject(projectId: string, userId?: string) {
 
   const board = await Board.findOne({ projectId }).lean();
   if (board) {
+    const tasks = await Task.find({ boardId: board._id }).lean();
+    const taskIds = tasks.map((t) => t._id.toString());
+
+    if (taskIds.length > 0) {
+      await Comment.deleteMany({ taskId: { $in: taskIds } });
+      await Attachment.deleteMany({ taskId: { $in: taskIds } });
+      await ChecklistItem.deleteMany({ taskId: { $in: taskIds } });
+      await TaskDependency.deleteMany({
+        $or: [
+          { blockingTaskId: { $in: taskIds } },
+          { blockedTaskId: { $in: taskIds } },
+        ],
+      });
+    }
+
     await Column.deleteMany({ boardId: board._id });
     await Task.deleteMany({ boardId: board._id });
     await Board.findByIdAndDelete(board._id);
