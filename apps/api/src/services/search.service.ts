@@ -51,13 +51,18 @@ export async function searchWorkspace(opts: SearchOptions) {
       taskFilter.dueDate = dueFilter;
     }
 
-    const tasks = await Task.find(taskFilter)
+    const tasksQuery = Task.find(taskFilter)
       .populate("assigneeIds", "name avatarUrl")
       .populate("labelIds", "name color")
       .sort(textQuery ? { score: { $meta: "textScore" as const } } : { updatedAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
+
+    if (textQuery) {
+      tasksQuery.select({ score: { $meta: "textScore" as const } });
+    }
+
+    const tasks = await tasksQuery.lean();
 
     results.tasks = tasks;
   }
@@ -69,11 +74,16 @@ export async function searchWorkspace(opts: SearchOptions) {
       projectFilter.$text = { $search: textQuery };
     }
 
-    const projects = await Project.find(projectFilter)
+    const projectsQuery = Project.find(projectFilter)
       .sort(textQuery ? { score: { $meta: "textScore" as const } } : { updatedAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
+
+    if (textQuery) {
+      projectsQuery.select({ score: { $meta: "textScore" as const } });
+    }
+
+    const projects = await projectsQuery.lean();
 
     results.projects = projects;
   }
