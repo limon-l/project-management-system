@@ -14,11 +14,9 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       const { page, limit } = request.query as { page?: string; limit?: string };
-      const result = await getNotifications(
-        request.user!.userId,
-        page ? parseInt(page) : 1,
-        limit ? parseInt(limit) : 20
-      );
+      const pageNum = Math.max(1, parseInt(page || "1", 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit || "20", 10) || 20));
+      const result = await getNotifications(request.user!.userId, pageNum, limitNum);
       sendSuccess(reply, result);
     }
   );
