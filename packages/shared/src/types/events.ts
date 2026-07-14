@@ -51,7 +51,7 @@ export interface ServerToClientEvents {
   "notification:created": (payload: { notification: NotificationResponse }) => void;
 
   "dependency:created": (payload: { dependency: TaskDependencyResponse }) => void;
-  "dependency:deleted": (payload: { dependency: { id: string; blockingTaskId: string; blockedTaskId: string } }) => void;
+  "dependency:deleted": (payload: { dependency: { id: string; projectId: string; blockingTaskId: string; blockedTaskId: string } }) => void;
 }
 
 export interface ClientToServerEvents {
