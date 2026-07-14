@@ -9,6 +9,7 @@ import {
   Attachment,
   ChecklistItem,
   TaskDependency,
+  Notification,
 } from "../models/index.js";
 import { AppError, validate, slugify, generatePosition } from "../utils/helpers.js";
 import {
@@ -166,6 +167,7 @@ export async function deleteProject(projectId: string, userId?: string) {
   }
 
   await ProjectMember.deleteMany({ projectId });
+  await Notification.deleteMany({ projectId });
   await Project.findByIdAndDelete(projectId);
 
   if (userId) {
