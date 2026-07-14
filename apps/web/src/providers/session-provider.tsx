@@ -49,7 +49,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (loading) return;
-    const isPublic = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+    const isPublic = PUBLIC_ROUTES.some((route) => route === pathname || pathname.startsWith(route + "/"));
     if (!user && !isPublic) {
       router.push("/login");
     }
