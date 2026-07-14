@@ -4,7 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
-  useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { useAuth } from "../hooks/use-auth";
@@ -24,13 +24,13 @@ export function useSocket() {
 
 export function SocketProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const isConnected = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     if (!user) {
-      if (isConnected.current) {
+      if (isConnected) {
         disconnectSocket();
-        isConnected.current = false;
+        setIsConnected(false);
       }
       return;
     }
@@ -38,28 +38,28 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const socket = getSocket();
 
     const onConnect = () => {
-      isConnected.current = true;
+      setIsConnected(true);
     };
 
     const onDisconnect = () => {
-      isConnected.current = false;
+      setIsConnected(false);
     };
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
     if (socket.connected) {
-      isConnected.current = true;
+      setIsConnected(true);
     }
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
     };
-  }, [user]);
+  }, [user, isConnected]);
 
   return (
-    <SocketContext.Provider value={{ isConnected: isConnected.current }}>
+    <SocketContext.Provider value={{ isConnected }}>
       {children}
     </SocketContext.Provider>
   );

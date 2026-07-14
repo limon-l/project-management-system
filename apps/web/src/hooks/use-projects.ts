@@ -26,6 +26,15 @@ export function useProjects(workspaceId: string) {
   });
 }
 
+export function useProject(workspaceId: string, projectId: string) {
+  return useQuery({
+    queryKey: ["project", workspaceId, projectId],
+    queryFn: () =>
+      api<Project>(`/api/projects/${projectId}`),
+    enabled: !!projectId,
+  });
+}
+
 export function useCreateProject(workspaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({

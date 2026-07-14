@@ -32,7 +32,7 @@ export function CommandPalette() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        setOpen((prev) => { return !prev; });
       }
       if (e.key === "Escape") {
         setOpen(false);

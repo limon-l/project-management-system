@@ -34,6 +34,10 @@ export function useRealtime(projectId?: string) {
       void queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
     }
 
+    function invalidateDependencies() {
+      void queryClient.invalidateQueries({ queryKey: ["dependencies"] });
+    }
+
     function invalidateComments() {
       void queryClient.invalidateQueries({ queryKey: ["comments"] });
     }
@@ -47,8 +51,8 @@ export function useRealtime(projectId?: string) {
     socket.on("task:moved", () => { invalidateTasks(); });
     socket.on("task:deleted", () => { invalidateTasks(); });
 
-    socket.on("dependency:created", () => { invalidateTasks(); });
-    socket.on("dependency:deleted", () => { invalidateTasks(); });
+    socket.on("dependency:created", () => { invalidateTasks(); invalidateDependencies(); });
+    socket.on("dependency:deleted", () => { invalidateTasks(); invalidateDependencies(); });
 
     socket.on("column:created", () => { invalidateProject(); });
     socket.on("column:updated", () => { invalidateProject(); });

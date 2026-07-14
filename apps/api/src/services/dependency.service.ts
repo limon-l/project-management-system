@@ -9,7 +9,10 @@ import { createDependencySchema, deleteDependencySchema } from "@boardflow/share
 import { emitToProject } from "../socket/index.js";
 
 export async function getTaskDependencies(taskId: string, projectId: string) {
-  const dependencies = await TaskDependency.find({ projectId })
+  const dependencies = await TaskDependency.find({
+    projectId,
+    $or: [{ blockingTaskId: taskId }, { blockedTaskId: taskId }],
+  })
     .populate("blockingTaskId", "key title completed")
     .populate("blockedTaskId", "key title completed")
     .lean();
