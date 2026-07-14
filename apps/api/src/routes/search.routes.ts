@@ -1,0 +1,44 @@
+import type { FastifyInstance } from "fastify";
+import { searchWorkspace } from "../services/search.service.js";
+import { authMiddleware, authorize } from "../middleware/index.js";
+import { sendSuccess } from "../utils/helpers.js";
+
+export async function searchRoutes(app: FastifyInstance): Promise<void> {
+  app.get(
+    "/workspaces/:workspaceId/search",
+    { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] },
+    async (request, reply) => {
+      const { workspaceId } = request.params as { workspaceId: string };
+      const query = request.query as {
+        q?: string;
+        type?: "tasks" | "projects" | "members";
+        assigneeId?: string;
+        priority?: string;
+        labelId?: string;
+        dueDateFrom?: string;
+        dueDateTo?: string;
+        completed?: string;
+        columnId?: string;
+        page?: string;
+        limit?: string;
+      };
+
+      const results = await searchWorkspace({
+        workspaceId,
+        query: query.q || "",
+        type: query.type,
+        assigneeId: query.assigneeId,
+        priority: query.priority,
+        labelId: query.labelId,
+        dueDateFrom: query.dueDateFrom,
+        dueDateTo: query.dueDateTo,
+        completed: query.completed !== undefined ? query.completed === "true" : undefined,
+        columnId: query.columnId,
+        page: query.page ? parseInt(query.page) : 1,
+        limit: query.limit ? parseInt(query.limit) : 20,
+      });
+
+      sendSuccess(reply, results);
+    }
+  );
+}
