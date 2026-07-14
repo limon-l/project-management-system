@@ -39,6 +39,12 @@ export interface ServerToClientEvents {
     projectId: string;
     userId: string;
   }) => void;
+  "project:member_updated": (payload: {
+    projectId: string;
+    memberId: string;
+    userId: string;
+    role: string;
+  }) => void;
 
   "workspace:member_joined": (payload: {
     member: WorkspaceMemberResponse;
@@ -46,6 +52,12 @@ export interface ServerToClientEvents {
   "workspace:member_removed": (payload: {
     workspaceId: string;
     userId: string;
+  }) => void;
+  "workspace:member_updated": (payload: {
+    workspaceId: string;
+    memberId: string;
+    userId: string;
+    role: string;
   }) => void;
 
   "notification:created": (payload: { notification: NotificationResponse }) => void;

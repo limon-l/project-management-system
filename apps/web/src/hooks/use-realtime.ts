@@ -66,6 +66,7 @@ export function useRealtime(projectId?: string) {
     socket.on("project:updated", () => { invalidateProject(); });
     socket.on("project:member_added", () => { invalidateMembers(); });
     socket.on("project:member_removed", () => { invalidateMembers(); });
+    socket.on("project:member_updated", () => { invalidateMembers(); });
 
     return () => {
       leaveProject(projectId);
@@ -86,6 +87,7 @@ export function useRealtime(projectId?: string) {
       socket.off("project:updated");
       socket.off("project:member_added");
       socket.off("project:member_removed");
+      socket.off("project:member_updated");
     };
   }, [user, projectId, queryClient]);
 }
@@ -115,11 +117,13 @@ export function useWorkspaceRealtime(workspaceId?: string) {
 
     socket.on("workspace:member_joined", invalidateMembers);
     socket.on("workspace:member_removed", invalidateMembers);
+    socket.on("workspace:member_updated", invalidateMembers);
 
     return () => {
       socket.emit("leave:workspace", { workspaceId });
       socket.off("workspace:member_joined", invalidateMembers);
       socket.off("workspace:member_removed", invalidateMembers);
+      socket.off("workspace:member_updated", invalidateMembers);
     };
   }, [user, workspaceId, queryClient]);
 }
