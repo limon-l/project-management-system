@@ -17,11 +17,9 @@ export async function commentRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       const { taskId } = request.params as { taskId: string };
       const { page, limit } = request.query as { page?: string; limit?: string };
-      const result = await getTaskComments(
-        taskId,
-        page ? parseInt(page) : 1,
-        limit ? parseInt(limit) : 50
-      );
+      const pageNum = Math.max(1, parseInt(page || "1", 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit || "50", 10) || 50));
+      const result = await getTaskComments(taskId, pageNum, limitNum);
       sendSuccess(reply, result);
     }
   );
