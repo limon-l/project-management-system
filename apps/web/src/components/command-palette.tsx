@@ -153,10 +153,10 @@ export function CommandPalette() {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
+      if (e.key === "ArrowDown" && flatItems.length > 0) {
         e.preventDefault();
         setSelectedIndex((i) => (i + 1) % flatItems.length);
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === "ArrowUp" && flatItems.length > 0) {
         e.preventDefault();
         setSelectedIndex((i) => (i - 1 + flatItems.length) % flatItems.length);
       } else if (e.key === "Enter" && flatItems[selectedIndex]) {
