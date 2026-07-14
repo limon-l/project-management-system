@@ -18,12 +18,18 @@ import type {
   ChecklistItemResponse,
   CommentResponse,
   LabelResponse,
+  TaskDependencyResponse,
 } from "./types/project.js";
 import type {
   AttachmentResponse,
   BoardResponse,
 } from "./types/attachment.js";
 import type { NotificationResponse, ActivityResponse } from "./types/notification.js";
+import type {
+  CreateLabelInput,
+  UpdateLabelInput,
+  UpdateNotificationPreferencesInput,
+} from "./validation/attachment.js";
 import type {
   RegisterInput,
   LoginInput,
@@ -61,10 +67,9 @@ import type {
   ReorderColumnsInput,
 } from "./validation/board.js";
 import type {
-  CreateLabelInput,
-  UpdateLabelInput,
-  UpdateNotificationPreferencesInput,
-} from "./validation/attachment.js";
+  CreateDependencyInput,
+  DeleteDependencyInput,
+} from "./validation/dependency.js";
 
 // ─── AUTH ────────────────────────────────────────────────────────
 
@@ -253,6 +258,24 @@ export interface TaskContracts {
   };
   "DELETE /api/tasks/:taskId/checklist/:itemId": {
     response: ApiResponse<void>;
+  };
+}
+
+// ─── DEPENDENCIES ─────────────────────────────────────────────────
+
+export interface DependencyContracts {
+  "GET /api/tasks/:taskId/dependencies": {
+    response: ApiResponse<{
+      blocking: TaskDependencyResponse[];
+      blockedBy: TaskDependencyResponse[];
+    }>;
+  };
+  "POST /api/tasks/:taskId/dependencies": {
+    body: CreateDependencyInput;
+    response: ApiResponse<{ dependency: TaskDependencyResponse }>;
+  };
+  "DELETE /api/dependencies/:dependencyId": {
+    response: ApiResponse<{ dependency: { id: string; blockingTaskId: string; blockedTaskId: string } }>;
   };
 }
 

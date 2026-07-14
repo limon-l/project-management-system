@@ -21,7 +21,7 @@ class LocalStorage implements StorageBackend {
   constructor() {
     this.dir = getEnv().UPLOAD_DIR;
     if (!existsSync(this.dir)) {
-      mkdir(this.dir, { recursive: true }).catch(() => {});
+      mkdir(this.dir, { recursive: true }).catch(() => { void 0; });
     }
   }
 

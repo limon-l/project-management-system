@@ -16,12 +16,17 @@ export function CreateTaskForm({
 }: CreateTaskFormProps) {
   const [title, setTitle] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = () => {
     const trimmed = title.trim();
     if (!trimmed) return;
     onSubmit(trimmed);
     setTitle("");
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submit();
   };
 
   return (
@@ -33,7 +38,7 @@ export function CreateTaskForm({
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            handleSubmit(e);
+            submit();
           }
           if (e.key === "Escape") onCancel();
         }}

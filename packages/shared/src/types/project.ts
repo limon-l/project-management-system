@@ -99,3 +99,24 @@ export interface LabelResponse {
   name: string;
   color: string;
 }
+
+export interface TaskDependencyResponse {
+  id: string;
+  projectId: string;
+  blockingTaskId: string;
+  blockedTaskId: string;
+  blockingTask: {
+    id: string;
+    key: string;
+    title: string;
+    completed: boolean;
+  };
+  blockedTask: {
+    id: string;
+    key: string;
+    title: string;
+    completed: boolean;
+  };
+  createdAt: string;
+}
+

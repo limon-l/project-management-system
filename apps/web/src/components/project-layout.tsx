@@ -15,6 +15,7 @@ interface ProjectLayoutProps {
 const navItems = [
   { label: "Overview", suffix: "" },
   { label: "Board", suffix: "/board" },
+  { label: "List", suffix: "/list" },
   { label: "Analytics", suffix: "/analytics" },
   { label: "Members", suffix: "/members" },
   { label: "Activity", suffix: "/activity" },

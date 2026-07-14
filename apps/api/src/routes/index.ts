@@ -9,6 +9,7 @@ import { searchRoutes } from "./search.routes.js";
 import { myWorkRoutes } from "./my-work.routes.js";
 import { attachmentRoutes } from "./attachment.routes.js";
 import { analyticsRoutes } from "./analytics.routes.js";
+import { dependencyRoutes } from "./dependency.routes.js";
 
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(authRoutes, { prefix: "/api/auth" });
@@ -21,6 +22,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(myWorkRoutes, { prefix: "/api" });
   await app.register(attachmentRoutes, { prefix: "/api" });
   await app.register(analyticsRoutes, { prefix: "/api" });
+  await app.register(dependencyRoutes, { prefix: "/api" });
 
   // Serve uploaded files in development
   if (process.env.NODE_ENV !== "production") {

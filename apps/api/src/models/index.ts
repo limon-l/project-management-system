@@ -18,3 +18,7 @@ export { Label, type ILabel } from "./Label.js";
 export { Attachment, type IAttachment } from "./Attachment.js";
 export { Notification, type INotification } from "./Notification.js";
 export { Activity, type IActivity } from "./Activity.js";
+export {
+  TaskDependency,
+  type ITaskDependency,
+} from "./TaskDependency.js";

@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");

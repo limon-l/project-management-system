@@ -27,38 +27,41 @@ export function useRealtime(projectId?: string) {
     joinedRef.current = true;
 
     function invalidateProject() {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     }
 
     function invalidateTasks() {
-      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
     }
 
     function invalidateComments() {
-      queryClient.invalidateQueries({ queryKey: ["comments"] });
+      void queryClient.invalidateQueries({ queryKey: ["comments"] });
     }
 
     function invalidateMembers() {
-      queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
     }
 
-    socket.on("task:created", () => invalidateTasks());
-    socket.on("task:updated", () => invalidateTasks());
-    socket.on("task:moved", () => invalidateTasks());
-    socket.on("task:deleted", () => invalidateTasks());
+    socket.on("task:created", () => { invalidateTasks(); });
+    socket.on("task:updated", () => { invalidateTasks(); });
+    socket.on("task:moved", () => { invalidateTasks(); });
+    socket.on("task:deleted", () => { invalidateTasks(); });
 
-    socket.on("column:created", () => invalidateProject());
-    socket.on("column:updated", () => invalidateProject());
-    socket.on("column:reordered", () => invalidateProject());
-    socket.on("column:deleted", () => invalidateProject());
+    socket.on("dependency:created", () => { invalidateTasks(); });
+    socket.on("dependency:deleted", () => { invalidateTasks(); });
 
-    socket.on("comment:created", () => invalidateComments());
-    socket.on("comment:updated", () => invalidateComments());
-    socket.on("comment:deleted", () => invalidateComments());
+    socket.on("column:created", () => { invalidateProject(); });
+    socket.on("column:updated", () => { invalidateProject(); });
+    socket.on("column:reordered", () => { invalidateProject(); });
+    socket.on("column:deleted", () => { invalidateProject(); });
 
-    socket.on("project:updated", () => invalidateProject());
-    socket.on("project:member_added", () => invalidateMembers());
-    socket.on("project:member_removed", () => invalidateMembers());
+    socket.on("comment:created", () => { invalidateComments(); });
+    socket.on("comment:updated", () => { invalidateComments(); });
+    socket.on("comment:deleted", () => { invalidateComments(); });
+
+    socket.on("project:updated", () => { invalidateProject(); });
+    socket.on("project:member_added", () => { invalidateMembers(); });
+    socket.on("project:member_removed", () => { invalidateMembers(); });
 
     return () => {
       leaveProject(projectId);
@@ -67,6 +70,8 @@ export function useRealtime(projectId?: string) {
       socket.off("task:updated");
       socket.off("task:moved");
       socket.off("task:deleted");
+      socket.off("dependency:created");
+      socket.off("dependency:deleted");
       socket.off("column:created");
       socket.off("column:updated");
       socket.off("column:reordered");

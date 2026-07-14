@@ -2,6 +2,7 @@ import type { TaskResponse, ColumnResponse, CommentResponse } from "./project.js
 import type { ProjectResponse } from "./project.js";
 import type { WorkspaceMemberResponse } from "./workspace.js";
 import type { NotificationResponse } from "./notification.js";
+import type { TaskDependencyResponse } from "./project.js";
 
 export interface ServerToClientEvents {
   "task:created": (payload: { task: TaskResponse; columnId: string }) => void;
@@ -48,6 +49,9 @@ export interface ServerToClientEvents {
   }) => void;
 
   "notification:created": (payload: { notification: NotificationResponse }) => void;
+
+  "dependency:created": (payload: { dependency: TaskDependencyResponse }) => void;
+  "dependency:deleted": (payload: { dependency: { id: string; blockingTaskId: string; blockedTaskId: string } }) => void;
 }
 
 export interface ClientToServerEvents {

@@ -1,75 +1,42 @@
 "use client";
 
-import { useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { NotificationBell } from "./notification-bell";
-import { SearchDialog } from "./search-dialog";
 
 export function AppHeader() {
   const { user, logout } = useAuth();
-  const [searchOpen, setSearchOpen] = useState(false);
 
   if (!user) return null;
 
   return (
     <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 24px",
-        height: "56px",
-        borderBottom: "1px solid #e5e7eb",
-        background: "#fff",
-      }}
+      className="flex items-center justify-between border-b border-border px-6"
+      style={{ height: "56px" }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <strong style={{ fontSize: "18px" }}>BoardFlow</strong>
+      <div className="flex items-center gap-2">
+        <strong className="text-lg font-bold">BoardFlow</strong>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div className="flex items-center gap-3">
         <button
-          onClick={() => setSearchOpen(true)}
-          aria-label="Search"
-          style={{
-            background: "none",
-            border: "1px solid #e5e7eb",
-            borderRadius: "6px",
-            padding: "6px 12px",
-            fontSize: "13px",
-            color: "#9ca3af",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
+          onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+          className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
           Search
-          <kbd style={{ background: "#f3f4f6", padding: "1px 5px", borderRadius: "4px", fontSize: "11px" }}>⌘K</kbd>
+          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs">⌘K</kbd>
         </button>
 
         <NotificationBell />
-        <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "14px", color: "#6b7280" }}>
-            {user.name}
-          </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">{user.name}</span>
           <button
             onClick={logout}
-            style={{
-              background: "none",
-              border: "1px solid #e5e7eb",
-              borderRadius: "6px",
-              padding: "4px 12px",
-              fontSize: "13px",
-              cursor: "pointer",
-              color: "#6b7280",
-            }}
+            className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-accent hover:text-foreground"
           >
             Logout
           </button>

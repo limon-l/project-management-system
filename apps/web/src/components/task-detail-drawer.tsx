@@ -9,9 +9,11 @@ import {
   useUpdateTask,
   useAddChecklistItem,
   useUpdateChecklistItem,
-  type Task,
+  useTaskDependencies,
+  useAddDependency,
+  useDeleteDependency,
 } from "@/hooks/use-tasks";
-import { useProjectMembers, type ProjectMember } from "@/hooks/use-project-members";
+import { useProjectMembers } from "@/hooks/use-project-members";
 import { CommentSection } from "./comment-section";
 import { AttachmentUpload } from "./attachment-upload";
 
@@ -39,22 +41,27 @@ export function TaskDetailDrawer({
   const { data: task } = useTaskDetail(taskId);
   const { data: checklist = [] } = useTaskChecklist(taskId);
   const { data: commentsData } = useTaskComments(taskId);
-  const { data: members = [] } = useProjectMembers(projectId);
+  const { data: _members = [] } = useProjectMembers(projectId);
+  const { data: dependencies } = useTaskDependencies(taskId);
   const updateTask = useUpdateTask(projectId);
   const addChecklistItem = useAddChecklistItem();
   const updateChecklistItem = useUpdateChecklistItem();
+  const addDependency = useAddDependency(projectId);
+  const deleteDependency = useDeleteDependency(projectId);
 
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState("");
+  const [addingDependencyKey, setAddingDependencyKey] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (task) setTitleValue(task.title);
   }, [task]);
 
   if (!taskId || !task) return null;
 
-  const comments = commentsData?.items || [];
+  const comments = commentsData?.items ?? [];
   const completedCount = checklist.filter((i) => i.completed).length;
 
   const handleTitleSave = () => {
@@ -72,7 +79,7 @@ export function TaskDetailDrawer({
     if (!newChecklistItem.trim()) return;
     addChecklistItem.mutate(
       { taskId: task.id, text: newChecklistItem.trim() },
-      { onSuccess: () => setNewChecklistItem("") }
+      { onSuccess: () => { setNewChecklistItem(""); } }
     );
   };
 
@@ -96,11 +103,13 @@ export function TaskDetailDrawer({
               <input
                 autoFocus
                 value={titleValue}
-                onChange={(e) => setTitleValue(e.target.value)}
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                onChange={(e) => { setTitleValue(e.target.value); }}
                 onBlur={handleTitleSave}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleTitleSave();
                   if (e.key === "Escape") {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     setTitleValue(task.title);
                     setEditingTitle(false);
                   }
@@ -109,7 +118,7 @@ export function TaskDetailDrawer({
               />
             ) : (
               <h2
-                onClick={() => setEditingTitle(true)}
+                onClick={() => { setEditingTitle(true); }}
                 className="cursor-pointer text-lg font-semibold hover:text-primary"
               >
                 {task.title}
@@ -149,7 +158,7 @@ export function TaskDetailDrawer({
                 {["NO_PRIORITY", "LOW", "MEDIUM", "HIGH", "URGENT"].map((p) => (
                   <button
                     key={p}
-                    onClick={() => handlePriorityChange(p)}
+                    onClick={() => { handlePriorityChange(p); }}
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-medium transition-all",
                       task.priority === p
@@ -204,7 +213,7 @@ export function TaskDetailDrawer({
             </div>
 
             {/* Dates */}
-            {(task.startDate || task.dueDate) && (
+            {(task.startDate ?? task.dueDate) && (
               <div className="flex gap-6">
                 {task.startDate && (
                   <div>
@@ -212,6 +221,7 @@ export function TaskDetailDrawer({
                       Start Date
                     </label>
                     <p className="text-sm">
+                      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
                       {new Date(task.startDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -224,6 +234,7 @@ export function TaskDetailDrawer({
                     <p
                       className={cn(
                         "text-sm",
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                         new Date(task.dueDate) < new Date() &&
                           !task.completed &&
                           "font-medium text-red-600"
@@ -258,6 +269,100 @@ export function TaskDetailDrawer({
                 </div>
               </div>
             )}
+
+            {/* Dependencies */}
+            <div>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Dependencies
+              </label>
+              {dependencies?.blocking && dependencies.blocking.length > 0 && (
+                <div className="mb-2">
+                  <p className="mb-1 text-xs text-muted-foreground">Blocked by</p>
+                  <div className="space-y-1">
+                    {dependencies.blocking.map((dep) => (
+                      <div
+                        key={dep.id}
+                        className={cn(
+                          "flex items-center justify-between rounded border border-border p-2",
+                          dep.blockingTask.completed && "opacity-60"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono text-muted-foreground">
+                            {dep.blockingTask.key}
+                          </span>
+                          <span className="text-sm">{dep.blockingTask.title}</span>
+                          {dep.blockingTask.completed && (
+                            <span className="text-xs text-success">Done</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {dependencies?.blockedBy && dependencies.blockedBy.length > 0 && (
+                <div className="mb-2">
+                  <p className="mb-1 text-xs text-muted-foreground">Blocking</p>
+                  <div className="space-y-1">
+                    {dependencies.blockedBy.map((dep) => (
+                      <div
+                        key={dep.id}
+                        className={cn(
+                          "flex items-center justify-between rounded border border-border p-2",
+                          dep.blockedTask.completed && "opacity-60"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono text-muted-foreground">
+                            {dep.blockedTask.key}
+                          </span>
+                          <span className="text-sm">{dep.blockedTask.title}</span>
+                          {dep.blockedTask.completed && (
+                            <span className="text-xs text-success">Done</span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => deleteDependency.mutate(dep.id)}
+                          className="text-xs text-muted-foreground hover:text-destructive"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(!dependencies?.blocking || dependencies.blocking.length === 0) &&
+                (!dependencies?.blockedBy || dependencies.blockedBy.length === 0) && (
+                  <p className="text-xs text-muted-foreground">No dependencies</p>
+                )}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!addingDependencyKey.trim() || !taskId) return;
+                  addDependency.mutate(
+                    { taskId, blockingTaskId: addingDependencyKey.trim() },
+                    { onSuccess: () => setAddingDependencyKey("") }
+                  );
+                }}
+                className="mt-2 flex gap-2"
+              >
+                <input
+                  value={addingDependencyKey}
+                  onChange={(e) => setAddingDependencyKey(e.target.value)}
+                  placeholder="Add blocker by task key..."
+                  className="h-7 flex-1 rounded border border-border px-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+                <button
+                  type="submit"
+                  disabled={!addingDependencyKey.trim()}
+                  className="inline-flex h-7 items-center rounded bg-primary px-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  Add
+                </button>
+              </form>
+            </div>
 
             {/* Checklist */}
             <div>

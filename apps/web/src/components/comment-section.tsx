@@ -18,6 +18,7 @@ export function CommentSection({
   const [newComment, setNewComment] = useState("");
   const addComment = useAddComment();
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = newComment.trim();

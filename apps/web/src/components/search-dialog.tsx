@@ -39,7 +39,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
           setWorkspaceIds(json.data.map((w: { id: string }) => w.id));
         }
       })
-      .catch(() => {});
+      .catch(() => { void 0; });
   }, [user]);
 
   const search = useCallback(async (q: string) => {

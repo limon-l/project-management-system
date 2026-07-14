@@ -9,3 +9,4 @@ export * from "./storage.service.js";
 export * from "./audit.service.js";
 export * from "./analytics.service.js";
 export * from "./attachment.service.js";
+export * from "./dependency.service.js";

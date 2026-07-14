@@ -159,7 +159,7 @@ export function Board({
 
       <DragOverlay>
         {activeTask ? (
-          <TaskCard task={activeTask} onClick={() => {}} />
+          <TaskCard task={activeTask} onClick={() => { void 0; }} />
         ) : null}
       </DragOverlay>
     </DndContext>

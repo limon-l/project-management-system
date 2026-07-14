@@ -37,6 +37,7 @@ export default function DashboardPage() {
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workspaceName.trim()) return;
@@ -52,6 +53,7 @@ export default function DashboardPage() {
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim() || !projectKey.trim()) return;

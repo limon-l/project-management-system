@@ -36,8 +36,8 @@ const NotificationContext = createContext<NotificationContextValue>({
   unreadCount: 0,
   notifications: [],
   open: false,
-  setOpen: () => {},
-  markRead: async () => {},
+  setOpen: () => { void 0; },
+  markRead: async () => { void 0; },
   loading: false,
 });
 

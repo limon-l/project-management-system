@@ -33,6 +33,8 @@ export interface Task {
   completed: boolean;
   createdAt: string;
   updatedAt: string;
+  blockedBy?: string[];
+  blocking?: string[];
 }
 
 export interface Column {
@@ -228,6 +230,60 @@ export function useAddComment() {
       }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["comments", variables.taskId] });
+    },
+  });
+}
+
+export interface TaskDependency {
+  id: string;
+  projectId: string;
+  blockingTaskId: string;
+  blockedTaskId: string;
+  blockingTask: {
+    id: string;
+    key: string;
+    title: string;
+    completed: boolean;
+  };
+  blockedTask: {
+    id: string;
+    key: string;
+    title: string;
+    completed: boolean;
+  };
+  createdAt: string;
+}
+
+export function useTaskDependencies(taskId: string | null) {
+  return useQuery({
+    queryKey: ["dependencies", taskId],
+    queryFn: () => api<{ blocking: TaskDependency[]; blockedBy: TaskDependency[] }>(`/api/tasks/${taskId}/dependencies`),
+    enabled: !!taskId,
+  });
+}
+
+export function useAddDependency(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, blockingTaskId }: { taskId: string; blockingTaskId: string }) =>
+      api<TaskDependency>(`/api/tasks/${taskId}/dependencies`, {
+        method: "POST",
+        body: { blockingTaskId },
+      }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["dependencies", variables.taskId] });
+    },
+  });
+}
+
+export function useDeleteDependency(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dependencyId: string) =>
+      api(`/api/dependencies/${dependencyId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
     },
   });
 }
