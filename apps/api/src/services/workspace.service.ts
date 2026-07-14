@@ -67,8 +67,13 @@ export async function updateWorkspace(
     throw new AppError(404, "NOT_FOUND", "Workspace not found");
   }
 
-  if (data.name !== undefined) workspace.name = data.name;
-  if (data.description !== undefined) workspace.description = data.description;
+  if (data.name !== undefined) {
+    workspace.name = data.name;
+    workspace.slug = slugify(data.name);
+  }
+  if (data.description !== undefined) {
+    workspace.description = data.description;
+  }
 
   await workspace.save();
   return workspace.toJSON();
