@@ -47,6 +47,14 @@ export async function getWorkspaceBySlug(slug: string) {
   return workspace;
 }
 
+export async function getWorkspaceById(workspaceId: string) {
+  const workspace = await Workspace.findById(workspaceId).lean();
+  if (!workspace) {
+    throw new AppError(404, "NOT_FOUND", "Workspace not found");
+  }
+  return workspace;
+}
+
 export async function updateWorkspace(
   workspaceId: string,
   userId: string,

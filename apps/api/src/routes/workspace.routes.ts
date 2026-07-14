@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import {
   createWorkspace,
   getUserWorkspaces,
-  getWorkspaceBySlug,
+  getWorkspaceById,
   updateWorkspace,
   getWorkspaceMembers,
   inviteMember,
@@ -35,11 +35,11 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
     sendSuccess(reply, workspaces);
   });
 
-  // Get workspace by slug
+  // Get workspace by ID
   app.get("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
-      const workspace = await getWorkspaceBySlug(workspaceId);
+      const workspace = await getWorkspaceById(workspaceId);
       sendSuccess(reply, workspace);
     } catch (error) {
       if (error instanceof AppError) {
