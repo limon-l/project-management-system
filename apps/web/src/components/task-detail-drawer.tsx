@@ -296,6 +296,12 @@ export function TaskDetailDrawer({
                             <span className="text-xs text-success">Done</span>
                           )}
                         </div>
+                        <button
+                          onClick={() => deleteDependency.mutate(dep.id)}
+                          className="text-xs text-muted-foreground hover:text-destructive"
+                        >
+                          Remove
+                        </button>
                       </div>
                     ))}
                   </div>
