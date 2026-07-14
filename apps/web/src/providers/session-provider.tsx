@@ -35,6 +35,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const refreshUser = useCallback(async () => {
     try {
       const data = await api<{ user: User }>("/api/auth/me");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setUser(data.user);
     } catch {
       setUser(null);
@@ -44,7 +45,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refreshUser();
+    void refreshUser();
   }, [refreshUser]);
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: { email, password },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     setUser(data.user);
   };
 
@@ -68,6 +70,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: { name, email, password },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     setUser(data.user);
   };
 

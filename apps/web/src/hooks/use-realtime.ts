@@ -2,12 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Socket } from "socket.io-client";
-import type { ServerToClientEvents, ClientToServerEvents } from "@boardflow/shared";
 import { useAuth } from "./use-auth";
 import { getSocket, joinProject, leaveProject } from "../lib/socket-client";
-
-type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export function useRealtime(projectId?: string) {
   const queryClient = useQueryClient();
@@ -17,7 +13,7 @@ export function useRealtime(projectId?: string) {
   useEffect(() => {
     if (!user || !projectId) return;
 
-    const socket = getSocket() as AppSocket;
+    const socket = getSocket();
 
     if (!socket.connected) {
       socket.connect();
@@ -99,7 +95,7 @@ export function useWorkspaceRealtime(workspaceId?: string) {
   useEffect(() => {
     if (!user || !workspaceId) return;
 
-    const socket = getSocket() as AppSocket;
+    const socket = getSocket();
 
     if (!socket.connected) {
       socket.connect();
@@ -108,11 +104,7 @@ export function useWorkspaceRealtime(workspaceId?: string) {
     socket.emit("join:workspace", { workspaceId });
 
     function invalidateMembers() {
-      queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
-    }
-
-    function invalidateProjects() {
-      queryClient.invalidateQueries({ queryKey: ["projects", workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
     }
 
     socket.on("workspace:member_joined", invalidateMembers);

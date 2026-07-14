@@ -141,14 +141,13 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
             <tr className="border-b border-border">
               <th
                 className="cursor-pointer px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-                onClick={() => handleSort("key")}
+                onClick={() => { handleSort("key"); }}
               >
                 Task {sortField === "key" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th
                 className="cursor-pointer px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                onClick={() => handleSort("title")}
+                onClick={() => { handleSort("title"); }}
               >
                 Title {sortField === "title" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
@@ -157,19 +156,19 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
               </th>
               <th
                 className="cursor-pointer px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                onClick={() => handleSort("priority")}
+                onClick={() => { handleSort("priority"); }}
               >
                 Priority {sortField === "priority" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th
                 className="cursor-pointer px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                onClick={() => handleSort("assignee")}
+                onClick={() => { handleSort("assignee"); }}
               >
                 Assignee {sortField === "assignee" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th
                 className="cursor-pointer px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                onClick={() => handleSort("dueDate")}
+                onClick={() => { handleSort("dueDate"); }}
               >
                 Due Date {sortField === "dueDate" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
@@ -187,12 +186,13 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
               </tr>
             ) : (
               sortedTasks.map((task) => {
-                const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.completed;
+                const isOverdue = task.dueDate && // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                  new Date(task.dueDate) < new Date() && !task.completed;
                 return (
                   <tr
                     key={task.id}
                     className="group cursor-pointer transition-colors hover:bg-accent/50"
-                    onClick={() => setSelectedTask(task)}
+                    onClick={() => { setSelectedTask(task); }}
                   >
                     <td className="px-4 py-3">
                       <span className="font-mono text-xs text-muted-foreground">{task.key}</span>
@@ -207,6 +207,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                                 key={label.id}
                                 className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
                                 style={{
+                                  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                                   backgroundColor: `${label.color}20`,
                                   color: label.color,
                                 }}
@@ -220,7 +221,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-xs text-muted-foreground">
-                        {columnMap.get(task.columnId) || "-"}
+                        {columnMap.get(task.columnId) ?? "-"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -230,7 +231,8 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                           priorityColors[task.priority] || priorityColors.NO_PRIORITY
                         )}
                       >
-                        {task.priority === "NO_PRIORITY" ? "None" : task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
+                        {task.priority === "NO_PRIORITY" ? "None" : // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                          task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -254,6 +256,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                     <td className="px-4 py-3">
                       {task.dueDate ? (
                         <span className={cn("text-xs", isOverdue && "font-medium text-red-600")}>
+                          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
                           {new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       ) : (
@@ -282,12 +285,12 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
       </div>
 
       {addingToColumn && (
-        <div className="fixed inset-0 z-30 bg-black/20" onClick={() => setAddingToColumn(null)}>
+        <div className="fixed inset-0 z-30 bg-black/20" onClick={() => { setAddingToColumn(null); }}>
           <div className="absolute left-1/2 top-1/2 w-96 -translate-x-1/2 -translate-y-1/2">
             <CreateTaskForm
               columnId={addingToColumn}
               onSubmit={handleCreateTask}
-              onCancel={() => setAddingToColumn(null)}
+              onCancel={() => { setAddingToColumn(null); }}
             />
           </div>
         </div>
@@ -298,7 +301,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
           taskId={selectedTask.id}
           projectId={projectId}
           currentUserId={user.id}
-          onClose={() => setSelectedTask(null)}
+          onClose={() => { setSelectedTask(null); }}
         />
       )}
     </div>

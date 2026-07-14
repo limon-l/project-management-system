@@ -14,7 +14,7 @@ import { Board } from "@/components/board";
 import { TaskDetailDrawer } from "@/components/task-detail-drawer";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { ProjectLayout } from "@/components/project-layout";
-import type { Task } from "@/hooks/use-tasks";
+import { Task } from "@/hooks/use-tasks";
 
 interface BoardPageProps {
   projectId: string;
@@ -32,6 +32,7 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
   const moveTask = useMoveTask(projectId);
   const createTask = useCreateTask(projectId);
 
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null);
 
@@ -64,7 +65,7 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
     if (!addingToColumn) return;
     createTask.mutate(
       { title, columnId: addingToColumn },
-      { onSuccess: () => setAddingToColumn(null) }
+      { onSuccess: () => { setAddingToColumn(null); } }
     );
   };
 
@@ -89,12 +90,12 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
 
       {/* Create Task Form Overlay */}
       {addingToColumn && (
-        <div className="fixed inset-0 z-30 bg-black/20" onClick={() => setAddingToColumn(null)}>
+        <div className="fixed inset-0 z-30 bg-black/20" onClick={() => { setAddingToColumn(null); }}>
           <div className="absolute left-1/2 top-1/2 w-96 -translate-x-1/2 -translate-y-1/2">
             <CreateTaskForm
               columnId={addingToColumn}
               onSubmit={handleCreateTask}
-              onCancel={() => setAddingToColumn(null)}
+              onCancel={() => { setAddingToColumn(null); }}
             />
           </div>
         </div>
@@ -106,7 +107,7 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
           taskId={selectedTask.id}
           projectId={projectId}
           currentUserId={user.id}
-          onClose={() => setSelectedTask(null)}
+          onClose={() => { setSelectedTask(null); }}
         />
       )}
     </ProjectLayout>

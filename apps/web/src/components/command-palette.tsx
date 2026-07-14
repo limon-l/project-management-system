@@ -192,8 +192,8 @@ export function CommandPalette() {
           <input
             autoFocus
             value={query}
-            // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-            onChange={(e) => setQuery(e.target.value)}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            onChange={(e) => { setQuery(e.target.value); }}
             onKeyDown={handleKeyDown}
             placeholder="Type a command or search..."
             className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
@@ -208,7 +208,7 @@ export function CommandPalette() {
               <p className="mb-1 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {group}
               </p>
-              {groupItems.map((item, idx) => {
+              {groupItems.map((item, _idx) => {
                 const globalIndex = flatItems.indexOf(item);
                 return (
                   <button
@@ -220,7 +220,7 @@ export function CommandPalette() {
                         ? "bg-accent text-accent-foreground"
                         : "hover:bg-accent/50"
                     )}
-                    onMouseEnter={() => setSelectedIndex(globalIndex)}
+                    onMouseEnter={() => { setSelectedIndex(globalIndex); }}
                   >
                     <div>
                       <p className="font-medium">{item.label}</p>

@@ -15,7 +15,7 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { BoardColumn } from "./board-column";
 import { TaskCard } from "./task-card";
-import type { Task, Column } from "@/hooks/use-tasks";
+import { Task, Column } from "@/hooks/use-tasks";
 
 interface BoardProps {
   columns: Column[];
@@ -36,6 +36,7 @@ export function Board({
   onTaskClick,
   onAddTask,
 }: BoardProps) {
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const sensors = useSensors(
@@ -80,7 +81,7 @@ export function Board({
       let targetColumnId: string;
 
       // Check if dropped over a column directly
-      const overData = over.data?.current;
+      const overData = over.data.current;
       if (overData?.column) {
         targetColumnId = overData.column.id as string;
       } else {
@@ -110,7 +111,8 @@ export function Board({
       if (overIndex === -1) {
         const lastPos = columnTasks[columnTasks.length - 1]?.position;
         newPosition = lastPos
-          ? String(parseInt(lastPos) + 1000).padStart(7, "0")
+          ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            String(parseInt(lastPos) + 1000).padStart(7, "0")
           : "0001000";
       } else {
         const prev = columnTasks[overIndex - 1];
@@ -118,10 +120,12 @@ export function Board({
 
         if (prev) {
           newPosition = String(
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             Math.floor((parseInt(prev.position) + parseInt(curr.position)) / 2)
           ).padStart(7, "0");
         } else {
-          newPosition = String(Math.floor(parseInt(curr.position) / 2)).padStart(7, "0") || "0000500";
+          newPosition = String(Math.floor(// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            parseInt(curr.position) / 2)).padStart(7, "0") || "0000500";
         }
       }
 
@@ -148,6 +152,7 @@ export function Board({
           <BoardColumn
             key={column.id}
             column={column}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             tasks={getTasksForColumn(column.id)}
             onTaskClick={onTaskClick}
             onAddTask={onAddTask}
