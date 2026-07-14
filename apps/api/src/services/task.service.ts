@@ -208,7 +208,7 @@ export async function addChecklistItem(
     .sort({ position: -1 })
     .lean();
   const position = lastItem
-    ? String(parseInt(lastItem.position) + 1)
+    ? String(parseInt(lastItem.position) + 1).padStart(6, "0")
     : "000001";
 
   const item = await ChecklistItem.create({
