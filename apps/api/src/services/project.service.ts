@@ -264,6 +264,13 @@ export async function updateProjectMemberRole(
 
   member.role = newRole;
   await member.save();
+
+  emitToProject(projectId, "project:member_updated", {
+    projectId,
+    memberId,
+    userId: member.userId.toString(),
+    role: newRole,
+  });
 }
 
 export async function removeProjectMember(projectId: string, memberId: string) {
