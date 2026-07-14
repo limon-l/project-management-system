@@ -1,4 +1,4 @@
-import { Task, ChecklistItem, Label, Column, Board, Project, Activity, Comment, Attachment, TaskDependency } from "../models/index.js";
+import { Task, ChecklistItem, Label, Column, Board, Project, Activity, Comment, Attachment, TaskDependency, Notification } from "../models/index.js";
 import { AppError, validate } from "../utils/helpers.js";
 import {
   createTaskSchema,
@@ -185,6 +185,7 @@ export async function deleteTask(taskId: string) {
     $or: [{ blockingTaskId: taskId }, { blockedTaskId: taskId }],
   });
   await ChecklistItem.deleteMany({ taskId });
+  await Notification.deleteMany({ entityType: "task", entityId: taskId });
   await Task.findByIdAndDelete(taskId);
   emitToProject(projectId, "task:deleted", { taskId, columnId });
 }
