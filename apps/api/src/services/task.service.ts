@@ -65,7 +65,7 @@ export async function createTask(
     projectId,
     boardId: column.boardId,
     columnId: data.columnId,
-    position: String(sequence * 1000).padStart(6, "0"),
+    position: String(sequence * 1000).padStart(7, "0"),
     key,
     title: data.title,
     priority: data.priority || "NO_PRIORITY",
