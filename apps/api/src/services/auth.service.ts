@@ -1,8 +1,8 @@
 import argon2 from "argon2";
 import { nanoid } from "nanoid";
 import { User, Session } from "../models/index.js";
-import { AppError, validate, slugify } from "../utils/helpers.js";
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, type RegisterInput, type LoginInput } from "@boardflow/shared";
+import { AppError, validate } from "../utils/helpers.js";
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@boardflow/shared";
 import { getEnv } from "../config/env.js";
 
 function generateSessionToken(): string {

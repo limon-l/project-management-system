@@ -27,10 +27,10 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // Serve uploaded files in development
   if (process.env.NODE_ENV !== "production") {
     const { readFileSync, existsSync } = await import("fs");
-    const { join } = await import("path");
+    const path = await import("path");
     app.get("/uploads/:filepath*", async (request, reply) => {
       const params = request.params as { filepath: string };
-      const filepath = join(
+      const filepath = path.join(
         process.env.UPLOAD_DIR || "./uploads",
         params.filepath
       );

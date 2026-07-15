@@ -14,12 +14,12 @@ export class AppError extends Error {
   }
 }
 
-export function sendSuccess<T>(
+export function sendSuccess(
   reply: FastifyReply,
-  data: T,
+  data: unknown,
   statusCode = 200
 ): void {
-  const response: ApiResponse<T> = { success: true, data };
+  const response: ApiResponse = { success: true, data };
   reply.status(statusCode).send(response);
 }
 
@@ -38,9 +38,9 @@ export function sendError(
   reply.status(statusCode).send(response);
 }
 
-export function sendPaginated<T>(
+export function sendPaginated(
   reply: FastifyReply,
-  items: T[],
+  items: unknown[],
   total: number,
   page: number,
   limit: number,
@@ -89,7 +89,7 @@ export function slugify(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export function generatePosition(index: number, total: number): string {
+export function generatePosition(index: number, _total: number): string {
   const step = 1000;
   return String((index + 1) * step).padStart(6, "0");
 }

@@ -1,13 +1,10 @@
-import { Workspace, WorkspaceMember, Invitation, User, Project } from "../models/index.js";
+import { Workspace, WorkspaceMember, Invitation, User } from "../models/index.js";
 import { AppError, validate, slugify } from "../utils/helpers.js";
 import {
   createWorkspaceSchema,
   updateWorkspaceSchema,
   inviteMemberSchema,
   respondInvitationSchema,
-  type CreateWorkspaceInput,
-  type UpdateWorkspaceInput,
-  type InviteMemberInput,
 } from "@boardflow/shared";
 import { ROLE_HIERARCHY } from "@boardflow/shared";
 import type { WorkspaceRole } from "../models/index.js";
@@ -165,7 +162,7 @@ export async function respondToInvitation(
   }
 
   const user = await User.findById(userId).lean();
-  if (!user || user.email !== invitation.email) {
+  if (user?.email !== invitation.email) {
     throw new AppError(403, "FORBIDDEN", "This invitation is not for you");
   }
 
@@ -227,7 +224,7 @@ export async function removeMember(
   removedBy: string
 ) {
   const member = await WorkspaceMember.findById(memberId);
-  if (!member || member.workspaceId.toString() !== workspaceId) {
+  if (member?.workspaceId.toString() !== workspaceId) {
     throw new AppError(404, "NOT_FOUND", "Member not found");
   }
 
@@ -244,7 +241,7 @@ export async function removeMember(
     throw new AppError(403, "FORBIDDEN", "Not a workspace member");
   }
 
-  const removerHierarchy = ROLE_HIERARCHY[remover.role as WorkspaceRole] ?? 0;
+  const removerHierarchy = ROLE_HIERARCHY[remover.role] ?? 0;
   const memberHierarchy = ROLE_HIERARCHY[member.role as WorkspaceRole] ?? 0;
 
   if (removerHierarchy <= memberHierarchy) {
@@ -270,7 +267,7 @@ export async function changeMemberRole(
   changedBy: string
 ) {
   const member = await WorkspaceMember.findById(memberId);
-  if (!member || member.workspaceId.toString() !== workspaceId) {
+  if (member?.workspaceId.toString() !== workspaceId) {
     throw new AppError(404, "NOT_FOUND", "Member not found");
   }
 
@@ -287,7 +284,7 @@ export async function changeMemberRole(
     throw new AppError(403, "FORBIDDEN", "Not a workspace member");
   }
 
-  const changerHierarchy = ROLE_HIERARCHY[changer.role as WorkspaceRole] ?? 0;
+  const changerHierarchy = ROLE_HIERARCHY[changer.role] ?? 0;
   const memberHierarchy = ROLE_HIERARCHY[member.role as WorkspaceRole] ?? 0;
   const newRoleHierarchy = ROLE_HIERARCHY[newRole] ?? 0;
 

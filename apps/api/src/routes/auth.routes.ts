@@ -10,7 +10,6 @@ import {
 } from "../services/index.js";
 import { authMiddleware } from "../middleware/index.js";
 import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
-import { ERROR_CODES } from "@boardflow/shared";
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
   app.post("/register", { config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (request, reply) => {

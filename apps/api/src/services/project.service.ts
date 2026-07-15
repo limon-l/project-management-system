@@ -4,7 +4,6 @@ import {
   Board,
   Column,
   Task,
-  WorkspaceMember,
   Comment,
   Attachment,
   ChecklistItem,
@@ -18,10 +17,9 @@ import {
   addProjectMemberSchema,
   VALID_STATUS_TRANSITIONS,
   DEFAULT_COLUMNS,
-  type ProjectStatus,
 } from "@boardflow/shared";
 import type { ProjectRole } from "@boardflow/shared";
-import { emitToProject, emitToWorkspace } from "../socket/index.js";
+import { emitToProject } from "../socket/index.js";
 import { logAudit } from "./audit.service.js";
 
 export async function createProject(
@@ -100,8 +98,8 @@ export async function updateProject(
   }
 
   if (data.status !== undefined) {
-    const currentStatus = project.status as ProjectStatus;
-    const newStatus = data.status as ProjectStatus;
+    const currentStatus = project.status;
+    const newStatus = data.status;
 
     if (!VALID_STATUS_TRANSITIONS[currentStatus]?.includes(newStatus)) {
       throw new AppError(
@@ -260,7 +258,7 @@ export async function updateProjectMemberRole(
   newRole: ProjectRole
 ) {
   const member = await ProjectMember.findById(memberId);
-  if (!member || member.projectId.toString() !== projectId) {
+  if (member?.projectId.toString() !== projectId) {
     throw new AppError(404, "NOT_FOUND", "Member not found");
   }
 
@@ -277,7 +275,7 @@ export async function updateProjectMemberRole(
 
 export async function removeProjectMember(projectId: string, memberId: string) {
   const member = await ProjectMember.findById(memberId);
-  if (!member || member.projectId.toString() !== projectId) {
+  if (member?.projectId.toString() !== projectId) {
     throw new AppError(404, "NOT_FOUND", "Member not found");
   }
 

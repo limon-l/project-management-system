@@ -92,7 +92,7 @@ async function main() {
   process.on("SIGTERM", shutdown);
 }
 
-main().catch((err) => {
+main().catch((err: unknown) => {
   logger.error({ err }, "Failed to start server");
   process.exit(1);
 });

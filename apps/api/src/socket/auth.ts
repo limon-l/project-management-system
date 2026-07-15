@@ -15,7 +15,7 @@ export async function verifySocketSession(
     return next(new Error("Authentication required"));
   }
 
-  const match = cookie.match(/session=([^;]+)/);
+  const match = /session=([^;]+)/.exec(cookie);
   if (!match) {
     return next(new Error("Authentication required"));
   }

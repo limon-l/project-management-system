@@ -4,7 +4,7 @@ import {
   createDependency,
   deleteDependency,
 } from "../services/dependency.service.js";
-import { authMiddleware, authorize } from "../middleware/index.js";
+import { authMiddleware } from "../middleware/index.js";
 import { requireTaskAccess } from "../middleware/taskAuth.js";
 import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
 

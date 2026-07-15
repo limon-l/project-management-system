@@ -37,13 +37,20 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
     toJSON: {
       transform(_doc, ret) {
-        const hidden = ["passwordHash", "emailVerificationToken", "emailVerificationExpires", "passwordResetToken", "passwordResetExpires", "__v"];
-        for (const key of hidden) {
-          delete (ret as Record<string, unknown>)[key];
+        const safe = ret as Record<string, unknown>;
+        for (const key of [
+          "passwordHash",
+          "emailVerificationToken",
+          "emailVerificationExpires",
+          "passwordResetToken",
+          "passwordResetExpires",
+          "__v",
+          "_id",
+        ]) {
+          Reflect.deleteProperty(safe, key);
         }
-        ret.id = ret._id.toString();
-        delete (ret as Record<string, unknown>)._id;
-        return ret;
+        safe.id = (ret as { _id: { toString(): string } })._id.toString();
+        return safe;
       },
     },
   }

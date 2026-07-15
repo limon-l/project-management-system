@@ -1,11 +1,10 @@
 import {
   Task,
   TaskDependency,
-  Project,
   ProjectMember,
 } from "../models/index.js";
 import { AppError, validate } from "../utils/helpers.js";
-import { createDependencySchema, deleteDependencySchema } from "@boardflow/shared";
+import { createDependencySchema } from "@boardflow/shared";
 import { emitToProject } from "../socket/index.js";
 
 export async function getTaskDependencies(taskId: string, projectId: string) {

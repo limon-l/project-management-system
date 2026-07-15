@@ -1,7 +1,5 @@
 import {
   Notification,
-  WorkspaceMember,
-  ProjectMember,
   Task,
   User,
 } from "../models/index.js";

@@ -55,7 +55,12 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
           if (t.completed) {
             grouped.completed.push(t);
           } else {
-            grouped[t.priority]?.push(t) ?? (grouped[t.priority] = [t]);
+            const arr = grouped[t.priority];
+            if (arr) {
+              arr.push(t);
+            } else {
+              grouped[t.priority] = [t];
+            }
           }
         }
         sendSuccess(reply, { tasks, groups: grouped });

@@ -18,7 +18,6 @@ interface SearchOptions {
 export async function searchWorkspace(opts: SearchOptions) {
   const { workspaceId, query, type, page = 1, limit = 20 } = opts;
   const skip = (page - 1) * limit;
-  const searchFilter: Record<string, unknown> = { workspaceId };
   const textQuery = query?.trim() || "";
 
   const results: {

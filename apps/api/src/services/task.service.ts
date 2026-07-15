@@ -1,4 +1,4 @@
-import { Task, ChecklistItem, Label, Column, Board, Project, Activity, Comment, Attachment, TaskDependency, Notification } from "../models/index.js";
+import { Task, ChecklistItem, Label, Column, Project, Activity, Comment, Attachment, TaskDependency, Notification } from "../models/index.js";
 import { AppError, validate } from "../utils/helpers.js";
 import {
   createTaskSchema,
@@ -6,9 +6,7 @@ import {
   moveTaskSchema,
   createChecklistItemSchema,
   updateChecklistItemSchema,
-  TASK_PRIORITIES,
 } from "@boardflow/shared";
-import type { TaskPriority } from "@boardflow/shared";
 import { emitToProject } from "../socket/index.js";
 import { notifyTaskAssignment } from "./notification.service.js";
 
@@ -94,7 +92,7 @@ export async function updateTask(taskId: string, input: unknown, userId?: string
 
   if (data.title !== undefined) task.title = data.title;
   if (data.description !== undefined) task.description = data.description;
-  if (data.priority !== undefined) task.priority = data.priority as TaskPriority;
+  if (data.priority !== undefined) task.priority = data.priority;
   if (data.labelIds !== undefined) task.labelIds = data.labelIds as unknown as typeof task.labelIds;
   if (data.startDate !== undefined) task.startDate = data.startDate;
   if (data.dueDate !== undefined) task.dueDate = data.dueDate;
@@ -151,8 +149,6 @@ export async function moveTask(taskId: string, input: unknown) {
   }).lean();
 
   const isMovingToDone = doneColumn?._id.toString() === data.columnId;
-  const isMovingFromDone =
-    doneColumn?._id.toString() === task.columnId.toString();
 
   const fromColumnId = task.columnId.toString();
   task.columnId = data.columnId as unknown as typeof task.columnId;
