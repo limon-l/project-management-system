@@ -55,7 +55,6 @@ export function TaskDetailDrawer({
   const [addingDependencyKey, setAddingDependencyKey] = useState("");
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (task) setTitleValue(task.title);
   }, [task]);
 
@@ -103,13 +102,11 @@ export function TaskDetailDrawer({
               <input
                 autoFocus
                 value={titleValue}
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 onChange={(e) => { setTitleValue(e.target.value); }}
                 onBlur={handleTitleSave}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleTitleSave();
                   if (e.key === "Escape") {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     setTitleValue(task.title);
                     setEditingTitle(false);
                   }
@@ -221,7 +218,6 @@ export function TaskDetailDrawer({
                       Start Date
                     </label>
                     <p className="text-sm">
-                      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
                       {new Date(task.startDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -234,13 +230,11 @@ export function TaskDetailDrawer({
                     <p
                       className={cn(
                         "text-sm",
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                         new Date(task.dueDate) < new Date() &&
                           !task.completed &&
                           "font-medium text-red-600"
                       )}
                     >
-                      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
                       {new Date(task.dueDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -260,7 +254,6 @@ export function TaskDetailDrawer({
                       key={label.id}
                       className="rounded-full px-2.5 py-0.5 text-xs font-medium"
                       style={{
-                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                         backgroundColor: `${label.color}20`,
                         color: label.color,
                       }}
@@ -299,7 +292,7 @@ export function TaskDetailDrawer({
                           )}
                         </div>
                         <button
-                          onClick={() => deleteDependency.mutate(dep.id)}
+                          onClick={() => { void deleteDependency.mutate(dep.id); }}
                           className="text-xs text-muted-foreground hover:text-destructive"
                         >
                           Remove
@@ -331,7 +324,7 @@ export function TaskDetailDrawer({
                           )}
                         </div>
                         <button
-                          onClick={() => deleteDependency.mutate(dep.id)}
+                          onClick={() => { void deleteDependency.mutate(dep.id); }}
                           className="text-xs text-muted-foreground hover:text-destructive"
                         >
                           Remove
@@ -358,8 +351,7 @@ export function TaskDetailDrawer({
               >
                 <input
                   value={addingDependencyKey}
-                  onChange={(e) => { // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    setAddingDependencyKey(e.target.value); }}
+                  onChange={(e) => { setAddingDependencyKey(e.target.value); }}
                   placeholder="Add blocker by task key..."
                   className="h-7 flex-1 rounded border border-border px-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
@@ -388,8 +380,7 @@ export function TaskDetailDrawer({
                   <div
                     className="h-full rounded-full bg-success transition-all"
                     style={{
-                      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                      width: `${checklist.length > 0 ? (completedCount / checklist.length) * 100 : 0}%`,
+                      width: `${String(checklist.length > 0 ? (completedCount / checklist.length) * 100 : 0)}%`,
                     }}
                   />
                 </div>
@@ -431,8 +422,7 @@ export function TaskDetailDrawer({
               >
                 <input
                   value={newChecklistItem}
-                  onChange={(e) => { // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    setNewChecklistItem(e.target.value); }}
+                  onChange={(e) => { setNewChecklistItem(e.target.value); }}
                   placeholder="Add an item..."
                   className="h-7 flex-1 rounded border border-border px-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />

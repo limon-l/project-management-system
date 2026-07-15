@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/use-auth";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface SearchResult {
   tasks?: { id: string; key: string; title: string; projectId: string }[];
@@ -35,11 +35,12 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
     fetch(`${API}/api/workspaces`, { credentials: "include" })
       .then((r) => r.json())
       .then((json) => {
-        if (json.success && Array.isArray(json.data)) {
-          setWorkspaceIds(json.data.map((w: { id: string }) => w.id));
+        const data = json as { success: boolean; data: { id: string }[] };
+        if (data.success && Array.isArray(data.data)) {
+          setWorkspaceIds(data.data.map((w) => w.id));
         }
       })
-      .catch(() => { void 0; });
+      .catch(() => { /* silent */ });
   }, [user]);
 
   const search = useCallback(async (q: string) => {
@@ -49,13 +50,12 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
     }
     setLoading(true);
     try {
-      // Search in first workspace for simplicity
       const wid = workspaceIds[0];
       const res = await fetch(
         `${API}/api/workspaces/${wid}/search?q=${encodeURIComponent(q)}`,
         { credentials: "include" }
       );
-      const json = await res.json();
+      const json = await res.json() as { success: boolean; data: SearchResult };
       if (json.success) setResults(json.data);
     } catch {
       // silent
@@ -65,7 +65,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
   }, [workspaceIds]);
 
   useEffect(() => {
-    const timer = setTimeout(() => search(query), 200);
+    const timer = setTimeout(() => { void search(query); }, 200);
     return () => clearTimeout(timer);
   }, [query, search]);
 
@@ -84,9 +84,9 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
 
   if (!open) return null;
 
-  const taskResults = results.tasks || [];
-  const projectResults = results.projects || [];
-  const memberResults = results.members || [];
+  const taskResults = results.tasks ?? [];
+  const projectResults = results.projects ?? [];
+  const memberResults = results.members ?? [];
   const hasResults = taskResults.length > 0 || projectResults.length > 0 || memberResults.length > 0;
 
   return (
@@ -118,7 +118,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); }}
             placeholder="Search tasks, projects, members..."
             style={{
               width: "100%",
@@ -157,7 +157,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
               {projectResults.map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => { router.push(`/workspaces/${workspaceIds[0]}/projects/${p.id}`); onClose(); }}
+                  onClick={() => { router.push(`/workspaces/${String(workspaceIds[0])}/projects/${String(p.id)}`); onClose(); }}
                   style={{
                     display: "block",
                     width: "100%",
@@ -183,7 +183,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
               {taskResults.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => { router.push(`/workspaces/${workspaceIds[0]}/projects/${t.projectId}?task=${t.id}`); onClose(); }}
+                  onClick={() => { router.push(`/workspaces/${String(workspaceIds[0])}/projects/${String(t.projectId)}?task=${String(t.id)}`); onClose(); }}
                   style={{
                     display: "block",
                     width: "100%",

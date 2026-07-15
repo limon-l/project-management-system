@@ -1,9 +1,8 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { useProjects } from "@/hooks/use-projects";
 import { ProjectLayout } from "@/components/project-layout";
 import Link from "next/link";
 

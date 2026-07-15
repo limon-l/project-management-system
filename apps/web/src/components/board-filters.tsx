@@ -25,11 +25,11 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
 
   function apply() {
     onFilterChange({
-      assigneeId: assigneeId || undefined,
-      priority: priority || undefined,
-      labelId: labelId || undefined,
+      assigneeId: assigneeId ?? undefined,
+      priority: priority ?? undefined,
+      labelId: labelId ?? undefined,
       completed: completed === "" ? undefined : completed === "true",
-      search: search || undefined,
+      search: search ?? undefined,
     });
   }
 
@@ -46,7 +46,7 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
     <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", padding: "12px 0" }}>
       <input
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => { setSearch(e.target.value); }}
         onKeyDown={(e) => { if (e.key === "Enter") apply(); }}
         placeholder="Search tasks..."
         style={{
@@ -61,7 +61,7 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
 
       <select
         value={assigneeId}
-        onChange={(e) => { setAssigneeId(e.target.value); onFilterChange({ assigneeId: e.target.value || undefined }); }}
+        onChange={(e) => { setAssigneeId(e.target.value); onFilterChange({ assigneeId: e.target.value ?? undefined }); }}
         style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #e5e7eb", fontSize: "13px", background: "#fff" }}
       >
         <option value="">All assignees</option>
@@ -72,7 +72,7 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
 
       <select
         value={priority}
-        onChange={(e) => { setPriority(e.target.value); onFilterChange({ priority: e.target.value || undefined }); }}
+        onChange={(e) => { setPriority(e.target.value); onFilterChange({ priority: e.target.value ?? undefined }); }}
         style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #e5e7eb", fontSize: "13px", background: "#fff" }}
       >
         <option value="">All priorities</option>
@@ -83,7 +83,7 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
 
       <select
         value={labelId}
-        onChange={(e) => { setLabelId(e.target.value); onFilterChange({ labelId: e.target.value || undefined }); }}
+        onChange={(e) => { setLabelId(e.target.value); onFilterChange({ labelId: e.target.value ?? undefined }); }}
         style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #e5e7eb", fontSize: "13px", background: "#fff" }}
       >
         <option value="">All labels</option>

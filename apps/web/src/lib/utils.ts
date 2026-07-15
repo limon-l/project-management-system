@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface RequestOptions {
   method?: string;
@@ -29,10 +29,10 @@ export async function api<T = unknown>(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  const data = await res.json();
+  const data = await res.json() as { success: boolean; data: T; error?: { message?: string } };
 
   if (!data.success) {
-    throw new Error(data.error?.message || "API request failed");
+    throw new Error(data.error?.message ?? "API request failed");
   }
 
   return data.data;
@@ -56,8 +56,8 @@ export function formatRelativeTime(date: string | Date): string {
   const diffDays = Math.floor(diffHr / 24);
 
   if (diffSec < 60) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHr < 24) return `${diffHr}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffMin < 60) return `${String(diffMin)}m ago`;
+  if (diffHr < 24) return `${String(diffHr)}h ago`;
+  if (diffDays < 7) return `${String(diffDays)}d ago`;
   return formatDate(date);
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 interface CreateTaskFormProps {
   columnId: string;
@@ -10,7 +9,7 @@ interface CreateTaskFormProps {
 }
 
 export function CreateTaskForm({
-  columnId,
+  columnId: _columnId,
   onSubmit,
   onCancel,
 }: CreateTaskFormProps) {
@@ -23,7 +22,6 @@ export function CreateTaskForm({
     setTitle("");
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     submit();
@@ -34,7 +32,7 @@ export function CreateTaskForm({
       <textarea
         autoFocus
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => { setTitle(e.target.value); }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();

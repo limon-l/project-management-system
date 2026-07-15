@@ -35,8 +35,8 @@ export default function ProjectAnalyticsPage({
     <ProjectLayout
       projectId={projectId}
       workspaceId={workspaceId}
-      projectName={project?.name || "Project"}
-      projectKey={project?.key || "PRJ"}
+      projectName={project?.name ?? "Project"}
+      projectKey={project?.key ?? "PRJ"}
     >
       <div className="flex h-14 items-center border-b border-border px-6">
         <h1 className="text-lg font-semibold">Analytics</h1>

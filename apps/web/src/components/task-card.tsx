@@ -34,7 +34,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        transform: `translate3d(${String(transform.x)}px, ${String(transform.y)}px, 0)`,
       }
     : undefined;
 
@@ -44,7 +44,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       style={style}
       {...listeners}
       {...attributes}
-      onClick={() => onClick(task)}
+      onClick={() => { onClick(task); }}
       className={cn(
         "cursor-grab rounded-lg border border-border bg-surface p-3 shadow-sm transition-shadow",
         "hover:shadow-md active:cursor-grabbing",

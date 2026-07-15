@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
 import { useAddComment, type Comment } from "@/hooks/use-tasks";
 
 interface CommentSectionProps {
@@ -13,19 +13,18 @@ interface CommentSectionProps {
 export function CommentSection({
   taskId,
   comments,
-  currentUserId,
+  currentUserId: _currentUserId,
 }: CommentSectionProps) {
   const [newComment, setNewComment] = useState("");
   const addComment = useAddComment();
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = newComment.trim();
     if (!trimmed) return;
     addComment.mutate(
       { taskId, content: trimmed },
-      { onSuccess: () => setNewComment("") }
+      { onSuccess: () => { setNewComment(""); } }
     );
   };
 
@@ -70,7 +69,7 @@ export function CommentSection({
         <div className="flex-1">
           <textarea
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={(e) => { setNewComment(e.target.value); }}
             placeholder="Write a comment..."
             className="min-h-[60px] w-full rounded-lg border border-border bg-surface p-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             rows={2}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface Attachment {
   id: string;
@@ -26,7 +26,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
       const res = await fetch(`${API}/api/tasks/${taskId}/attachments`, {
         credentials: "include",
       });
-      const json = await res.json();
+      const json = await res.json() as { success: boolean; data: { attachments: Attachment[] } };
       if (json.success) setAttachments(json.data.attachments);
     } catch {
       // silent
@@ -35,7 +35,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
     }
   }, [taskId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const upload = async (file: File) => {
     setUploading(true);
@@ -47,7 +47,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
         credentials: "include",
         body: form,
       });
-      const json = await res.json();
+      const json = await res.json() as { success: boolean; data: { attachment: Attachment } };
       if (json.success) {
         setAttachments((prev) => [json.data.attachment, ...prev]);
       }
@@ -71,7 +71,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
   };
 
   function formatBytes(bytes: number) {
-    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024) return `${String(bytes)} B`;
     if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / 1048576).toFixed(1)} MB`;
   }
@@ -83,7 +83,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
         <strong style={{ fontSize: "13px", color: "#374151" }}>Attachments</strong>
         <button
-          onClick={() => inputRef.current?.click()}
+          onClick={() => { inputRef.current?.click(); }}
           disabled={uploading}
           style={{
             padding: "4px 12px",
@@ -102,7 +102,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
           style={{ display: "none" }}
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) upload(file);
+            if (file) void upload(file);
             e.target.value = "";
           }}
         />
@@ -151,7 +151,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
                   fontWeight: 600,
                 }}
               >
-                {a.originalName.split(".").pop()?.toUpperCase() || "FILE"}
+                {a.originalName.split(".").pop()?.toUpperCase() ?? "FILE"}
               </div>
             )}
 
@@ -160,12 +160,12 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
                 {a.originalName}
               </div>
               <div style={{ fontSize: "11px", color: "#9ca3af" }}>
-                {formatBytes(a.size)} by {a.uploader?.name || "Unknown"}
+                {formatBytes(a.size)} by {a.uploader?.name ?? "Unknown"}
               </div>
             </div>
 
             <button
-              onClick={() => remove(a.id)}
+              onClick={() => { void remove(a.id); }}
               style={{
                 background: "none",
                 border: "none",

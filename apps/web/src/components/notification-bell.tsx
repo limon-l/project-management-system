@@ -7,11 +7,11 @@ function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return `${String(mins)}m ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return `${String(hrs)}h ago`;
   const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return `${String(days)}d ago`;
 }
 
 export function NotificationBell() {
@@ -32,8 +32,8 @@ export function NotificationBell() {
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
-        onClick={() => setOpen(!open)}
-        aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ""}`}
+        onClick={() => { setOpen(!open); }}
+        aria-label={`Notifications ${unreadCount > 0 ? `(${String(unreadCount)} unread)` : ""}`}
         style={{
           position: "relative",
           background: "none",
@@ -65,7 +65,7 @@ export function NotificationBell() {
               fontWeight: 600,
             }}
           >
-            {unreadCount > 9 ? "9+" : unreadCount}
+            {unreadCount > 9 ? "9+" : String(unreadCount)}
           </span>
         )}
       </button>
@@ -98,7 +98,7 @@ export function NotificationBell() {
             <strong style={{ fontSize: "14px" }}>Notifications</strong>
             {unreadCount > 0 && (
               <button
-                onClick={() => markRead()}
+                onClick={() => { markRead(); }}
                 style={{
                   background: "none",
                   border: "none",

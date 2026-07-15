@@ -42,17 +42,15 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
   const { data: tasks = [], isLoading: tasksLoading } = useProjectTasks(projectId);
   const { data: columns = [], isLoading: columnsLoading } = useProjectColumns(projectId);
   const createTask = useCreateTask(projectId);
-  const moveTask = useMoveTask(projectId);
+  const _moveTask = useMoveTask(projectId);
   const deleteTask = useDeleteTask(projectId);
 
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>("key");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const columnMap = new Map(columns.map((c: { id: string; name: string }) => [c.id, c.name] as [string, string]));
+  const columnMap = new Map<string, string>(columns.map((c) => [c.id, c.name]));
 
   const sortedTasks = [...tasks].sort((a, b) => {
     let comparison = 0;
@@ -61,15 +59,11 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
     } else if (sortField === "title") {
       comparison = a.title.localeCompare(b.title);
     } else if (sortField === "priority") {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       comparison = (priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4);
     } else if (sortField === "dueDate") {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
       comparison = aDate - bDate;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (sortField === "assignee") {
       const aName = a.assignees?.[0]?.user?.name ?? "";
       const bName = b.assignees?.[0]?.user?.name ?? "";
@@ -85,10 +79,6 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
       setSortField(field);
       setSortDirection("asc");
     }
-  };
-
-  const _handleTaskMove = (taskId: string, targetColumnId: string, position: string) => {
-    moveTask.mutate({ taskId, columnId: targetColumnId, position });
   };
 
   const handleCreateTask = (title: string) => {
@@ -113,7 +103,6 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
       <div className="flex h-14 items-center justify-between border-b border-border px-6">
         <h1 className="text-lg font-semibold">List</h1>
         <button
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           onClick={() => { setAddingToColumn(columns[0]?.id ?? ""); }}
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
@@ -186,7 +175,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
               </tr>
             ) : (
               sortedTasks.map((task) => {
-                const isOverdue = task.dueDate && // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                const isOverdue = task.dueDate &&
                   new Date(task.dueDate) < new Date() && !task.completed;
                 return (
                   <tr
@@ -200,14 +189,13 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{task.title}</span>
-                        {task.labels?.length > 0 && (
+                        {task.labels && task.labels.length > 0 && (
                           <div className="flex gap-1">
                             {task.labels.slice(0, 2).map((label) => (
                               <span
                                 key={label.id}
                                 className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
                                 style={{
-                                  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                                   backgroundColor: `${label.color}20`,
                                   color: label.color,
                                 }}
@@ -228,10 +216,10 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                       <span
                         className={cn(
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-                          priorityColors[task.priority] || priorityColors.NO_PRIORITY
+                          priorityColors[task.priority] ?? priorityColors.NO_PRIORITY
                         )}
                       >
-                        {task.priority === "NO_PRIORITY" ? "None" : // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                        {task.priority === "NO_PRIORITY" ? "None" :
                           task.priority.charAt(0) + task.priority.slice(1).toLowerCase()}
                       </span>
                     </td>
@@ -246,7 +234,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                             {a.user.name.charAt(0).toUpperCase()}
                           </div>
                         ))}
-                        {task.assignees?.length > 3 && (
+                        {task.assignees && task.assignees.length > 3 && (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground">
                             +{task.assignees.length - 3}
                           </div>
@@ -256,7 +244,6 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                     <td className="px-4 py-3">
                       {task.dueDate ? (
                         <span className={cn("text-xs", isOverdue && "font-medium text-red-600")}>
-                          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
                           {new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       ) : (

@@ -21,7 +21,7 @@ export function useProjects(workspaceId: string) {
   return useQuery({
     queryKey: ["projects", workspaceId],
     queryFn: () =>
-      api<Project[]>(`/api/workspaces/${workspaceId}/projects`),
+      api<Project[]>(`/api/workspaces/${String(workspaceId)}/projects`),
     enabled: !!workspaceId,
   });
 }
@@ -30,7 +30,7 @@ export function useProject(workspaceId: string, projectId: string) {
   return useQuery({
     queryKey: ["project", workspaceId, projectId],
     queryFn: () =>
-      api<Project>(`/api/projects/${projectId}`),
+      api<Project>(`/api/projects/${String(projectId)}`),
     enabled: !!projectId,
   });
 }
@@ -39,7 +39,7 @@ export function useCreateProject(workspaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { name: string; key: string; description?: string }) =>
-      api<Project>(`/api/workspaces/${workspaceId}/projects`, {
+      api<Project>(`/api/workspaces/${String(workspaceId)}/projects`, {
         method: "POST",
         body: data,
       }),

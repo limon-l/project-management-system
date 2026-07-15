@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/use-auth";
 import { useRouter } from "next/navigation";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface Task {
   id: string;
@@ -43,11 +43,11 @@ export default function MyWorkPage() {
           fetch(`${API}/api/my-work/tasks?groupBy=${groupBy}`, { credentials: "include" }),
           fetch(`${API}/api/my-work/summary`, { credentials: "include" }),
         ]);
-        const tasksJson = await tasksRes.json();
-        const summaryJson = await summaryRes.json();
+        const tasksJson = await tasksRes.json() as { success: boolean; data: { tasks: Task[]; groups?: Record<string, Task[]> } };
+        const summaryJson = await summaryRes.json() as { success: boolean; data: Summary };
         if (tasksJson.success) {
           setTasks(tasksJson.data.tasks);
-          setGroups(tasksJson.data.groups || {});
+          setGroups(tasksJson.data.groups ?? {});
         }
         if (summaryJson.success) setSummary(summaryJson.data);
       } catch {
@@ -56,7 +56,7 @@ export default function MyWorkPage() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, [user, authLoading, router, groupBy]);
 
   if (authLoading || loading) {
@@ -94,7 +94,7 @@ export default function MyWorkPage() {
           {(["dueDate", "priority", "project"] as const).map((g) => (
             <button
               key={g}
-              onClick={() => setGroupBy(g)}
+              onClick={() => { setGroupBy(g); }}
               style={{
                 padding: "6px 14px",
                 borderRadius: "6px",
@@ -133,7 +133,7 @@ export default function MyWorkPage() {
         return (
           <div key={key} style={{ marginBottom: "32px" }}>
             <h2 style={{ fontSize: "14px", fontWeight: 600, color: "#6b7280", margin: "0 0 12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {sectionTitles[key] || key} ({section.length})
+              {sectionTitles[key] ?? key} ({section.length})
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               {section.map((task) => (

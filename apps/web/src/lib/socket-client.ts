@@ -1,7 +1,7 @@
 import { io, type Socket } from "socket.io-client";
 import type { ServerToClientEvents, ClientToServerEvents } from "@boardflow/shared";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 

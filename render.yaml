@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: boardflow-api
+    env: node
+    region: ohio
+    plan: starter
+    buildCommand: |
+      corepack enable
+      corepack prepare pnpm@9.15.0 --activate
+      pnpm install --frozen-lockfile
+      pnpm --filter @boardflow/shared build
+      pnpm --filter @boardflow/api build
+    startCommand: node apps/api/dist/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: 3001
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: MONGODB_URI
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://your-frontend.vercel.app
+      - key: MAX_FILE_SIZE
+        value: "10485760"
+      - key: STORAGE_TYPE
+        value: local

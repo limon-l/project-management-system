@@ -65,7 +65,7 @@ export function BoardColumn({
       {!isDoneColumn && (
         <div className="px-2 pb-2">
           <button
-            onClick={() => onAddTask(column.id)}
+            onClick={() => { onAddTask(column.id); }}
             className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <svg

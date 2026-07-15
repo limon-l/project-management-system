@@ -21,8 +21,8 @@ export default function DashboardPage() {
   const [projectName, setProjectName] = useState("");
   const [projectKey, setProjectKey] = useState("");
 
-  const { data: projects = [] } = useProjects(selectedWorkspace || "");
-  const createProject = useCreateProject(selectedWorkspace || "");
+  const { data: projects = [] } = useProjects(selectedWorkspace ?? "");
+  const createProject = useCreateProject(selectedWorkspace ?? "");
 
   if (loading) {
     return (
@@ -37,8 +37,7 @@ export default function DashboardPage() {
     return null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const handleCreateWorkspace = async (e: React.FormEvent) => {
+  const handleCreateWorkspace = (e: React.FormEvent) => {
     e.preventDefault();
     if (!workspaceName.trim()) return;
     createWorkspace.mutate(
@@ -53,8 +52,7 @@ export default function DashboardPage() {
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const handleCreateProject = async (e: React.FormEvent) => {
+  const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim() || !projectKey.trim()) return;
     createProject.mutate(
@@ -65,7 +63,7 @@ export default function DashboardPage() {
           setProjectName("");
           setProjectKey("");
           router.push(
-            `/workspaces/${selectedWorkspace}/projects/${project.id}/board`
+            `/workspaces/${String(selectedWorkspace)}/projects/${String(project.id)}/board`
           );
         },
       }
@@ -91,7 +89,7 @@ export default function DashboardPage() {
             return (
               <button
                 key={wsId}
-                onClick={() => setSelectedWorkspace(wsId)}
+                onClick={() => { setSelectedWorkspace(wsId); }}
                 className={`mb-1 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
                   selectedWorkspace === wsId
                     ? "bg-accent font-medium text-accent-foreground"
@@ -106,7 +104,7 @@ export default function DashboardPage() {
             );
           })}
           <button
-            onClick={() => setShowCreateWorkspace(true)}
+            onClick={() => { setShowCreateWorkspace(true); }}
             className="mt-1 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <svg
@@ -150,7 +148,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <button
-              onClick={() => logout()}
+              onClick={() => { void logout(); }}
               className="rounded p-1 text-muted-foreground hover:text-foreground"
               title="Sign out"
             >
@@ -181,7 +179,7 @@ export default function DashboardPage() {
             {selectedWorkspace
               ?               workspaces.find(
                   (w: Workspace) => w.id === selectedWorkspace
-                )?.name || "Dashboard"
+                )?.name ?? "Dashboard"
               : "Dashboard"}
           </h1>
         </div>
@@ -196,7 +194,7 @@ export default function DashboardPage() {
                 Create or select a workspace to get started.
               </p>
               <button
-                onClick={() => setShowCreateWorkspace(true)}
+                onClick={() => { setShowCreateWorkspace(true); }}
                 className="mt-4 inline-flex h-10 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 Create Workspace
@@ -210,7 +208,7 @@ export default function DashboardPage() {
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Projects</h2>
                 <button
-                  onClick={() => setShowCreateProject(true)}
+                  onClick={() => { setShowCreateProject(true); }}
                   className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
                 >
                   <svg
@@ -243,19 +241,19 @@ export default function DashboardPage() {
                   {projects.map((project: Project) => (
                     <Link
                       key={project.id}
-                      href={`/workspaces/${selectedWorkspace}/projects/${project.id}/board`}
+                      href={`/workspaces/${String(selectedWorkspace)}/projects/${String(project.id)}/board`}
                       className="group rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-md"
                     >
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-xs font-bold text-primary">
-                          {project.key || "PRJ"}
+                          {project.key ?? "PRJ"}
                         </div>
                         <h3 className="text-sm font-semibold group-hover:text-primary">
                           {project.name}
                         </h3>
                       </div>
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Status: {project.status || "PLANNING"}
+                        Status: {project.status ?? "PLANNING"}
                       </p>
                     </Link>
                   ))}
@@ -270,11 +268,11 @@ export default function DashboardPage() {
       {showCreateWorkspace && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-          onClick={() => setShowCreateWorkspace(false)}
+          onClick={() => { setShowCreateWorkspace(false); }}
         >
           <div
             className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); }}
           >
             <h3 className="mb-4 text-lg font-semibold">Create Workspace</h3>
             <form onSubmit={handleCreateWorkspace}>
@@ -282,14 +280,14 @@ export default function DashboardPage() {
               <input
                 autoFocus
                 value={workspaceName}
-                onChange={(e) => setWorkspaceName(e.target.value)}
+                onChange={(e) => { setWorkspaceName(e.target.value); }}
                 placeholder="My Workspace"
                 className="mb-4 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowCreateWorkspace(false)}
+                  onClick={() => { setShowCreateWorkspace(false); }}
                   className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   Cancel
@@ -311,11 +309,11 @@ export default function DashboardPage() {
       {showCreateProject && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-          onClick={() => setShowCreateProject(false)}
+          onClick={() => { setShowCreateProject(false); }}
         >
           <div
             className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); }}
           >
             <h3 className="mb-4 text-lg font-semibold">Create Project</h3>
             <form onSubmit={handleCreateProject}>
@@ -323,7 +321,7 @@ export default function DashboardPage() {
               <input
                 autoFocus
                 value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
+                onChange={(e) => { setProjectName(e.target.value); }}
                 placeholder="My Project"
                 className="mb-3 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
@@ -345,7 +343,7 @@ export default function DashboardPage() {
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowCreateProject(false)}
+                  onClick={() => { setShowCreateProject(false); }}
                   className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   Cancel

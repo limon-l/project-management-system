@@ -14,32 +14,40 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    try {
-      await register(name, email, password);
-      router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
-    } finally {
-      setLoading(false);
-    }
+    register(name, email, password)
+      .then(() => { router.push("/dashboard"); })
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : "Registration failed");
+      })
+      .finally(() => { setLoading(false); });
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-background px-4">
+      {/* Background gradient */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-1/4 h-[500px] w-[600px] -translate-x-1/2 rounded-full bg-gradient-to-b from-primary/10 to-transparent blur-3xl" />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="text-2xl font-bold text-foreground">
+          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+              B
+            </div>
             BoardFlow
           </Link>
-          <h1 className="mt-4 text-xl font-semibold">Create your account</h1>
+          <h1 className="mt-6 text-2xl font-bold text-foreground">Create your account</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Start managing projects in minutes
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-surface p-8 shadow-sm">
           {error && (
             <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
               {error}
@@ -47,22 +55,22 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label htmlFor="name" className="mb-1 block text-sm font-medium">
-              Name
+            <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
+              Full Name
             </label>
             <input
               id="name"
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              onChange={(e) => { setName(e.target.value); }}
+              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Your name"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
               Email
             </label>
             <input
@@ -70,14 +78,14 @@ export default function RegisterPage() {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              onChange={(e) => { setEmail(e.target.value); }}
+              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium">
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground">
               Password
             </label>
             <input
@@ -86,24 +94,34 @@ export default function RegisterPage() {
               required
               minLength={8}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              onChange={(e) => { setPassword(e.target.value); }}
+              className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Min 8 characters"
             />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Must be at least 8 characters
+            </p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="h-10 w-full rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="h-11 w-full rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50"
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                Creating account...
+              </span>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-primary hover:underline">
+          <Link href="/login" className="font-semibold text-primary hover:underline">
             Sign in
           </Link>
         </p>

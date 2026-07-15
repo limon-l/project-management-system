@@ -61,7 +61,6 @@ export function CommandPalette() {
   const items: CommandItem[] = [
     ...tasks
       .filter((t) =>
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         t.title.toLowerCase().includes(query.toLowerCase()) ||
         t.key.toLowerCase().includes(query.toLowerCase())
       )
@@ -70,7 +69,6 @@ export function CommandPalette() {
         const project = projects.find((p) => p.id === task.projectId);
         const workspaceId = project?.workspaceId ?? "";
         return {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           id: `task-${task.id}`,
           label: task.title,
           description: task.key,
@@ -78,7 +76,6 @@ export function CommandPalette() {
           action: () => {
             setOpen(false);
             if (workspaceId) {
-              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
               router.push(`/workspaces/${workspaceId}/projects/${task.projectId}/board`);
             }
           },
@@ -88,14 +85,12 @@ export function CommandPalette() {
       .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 3)
       .map((project) => ({
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         id: `project-${project.id}`,
         label: project.name,
         description: project.key,
         group: "projects" as CommandGroup,
         action: () => {
           setOpen(false);
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           router.push(`/workspaces/${project.workspaceId}/projects/${project.id}/board`);
         },
       })),
@@ -103,13 +98,11 @@ export function CommandPalette() {
       .filter((w) => w.name.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 3)
       .map((workspace) => ({
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         id: `workspace-${workspace.id}`,
         label: workspace.name,
         group: "workspaces" as CommandGroup,
         action: () => {
           setOpen(false);
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           router.push(`/workspaces/${workspace.id}`);
         },
       })),
@@ -192,7 +185,6 @@ export function CommandPalette() {
           <input
             autoFocus
             value={query}
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             onChange={(e) => { setQuery(e.target.value); }}
             onKeyDown={handleKeyDown}
             placeholder="Type a command or search..."
@@ -208,7 +200,7 @@ export function CommandPalette() {
               <p className="mb-1 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {group}
               </p>
-              {groupItems.map((item, _idx) => {
+              {groupItems.map((item) => {
                 const globalIndex = flatItems.indexOf(item);
                 return (
                   <button

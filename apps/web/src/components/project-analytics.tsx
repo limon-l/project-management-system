@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface ProjectAnalytics {
   totalTasks: number;
@@ -24,7 +24,7 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
         const res = await fetch(`${API}/api/projects/${projectId}/analytics`, {
           credentials: "include",
         });
-        const json = await res.json();
+        const json = await res.json() as { success: boolean; data: ProjectAnalytics };
         if (json.success) setData(json.data);
       } catch {
         // silent
@@ -32,7 +32,7 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, [projectId]);
 
   if (loading) {
@@ -57,10 +57,10 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }}>
         {[
-          { label: "Total Tasks", value: data.totalTasks, color: "#374151" },
-          { label: "Completed", value: data.completedTasks, color: "#10b981" },
-          { label: "Completion", value: `${data.completionPercentage}%`, color: data.completionPercentage >= 80 ? "#10b981" : data.completionPercentage >= 50 ? "#f59e0b" : "#ef4444" },
-          { label: "Overdue", value: data.overdueTasks, color: data.overdueTasks > 0 ? "#ef4444" : "#9ca3af" },
+          { label: "Total Tasks", value: String(data.totalTasks), color: "#374151" },
+          { label: "Completed", value: String(data.completedTasks), color: "#10b981" },
+          { label: "Completion", value: `${String(data.completionPercentage)}%`, color: data.completionPercentage >= 80 ? "#10b981" : data.completionPercentage >= 50 ? "#f59e0b" : "#ef4444" },
+          { label: "Overdue", value: String(data.overdueTasks), color: data.overdueTasks > 0 ? "#ef4444" : "#9ca3af" },
         ].map((s) => (
           <div key={s.label} style={{ padding: "14px", borderRadius: "8px", border: "1px solid #e5e7eb", textAlign: "center" }}>
             <div style={{ fontSize: "24px", fontWeight: 700, color: s.color }}>{s.value}</div>
@@ -73,10 +73,10 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
       <div style={{ marginBottom: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280", marginBottom: "6px" }}>
           <span>Progress</span>
-          <span>{data.completionPercentage}%</span>
+          <span>{`${String(data.completionPercentage)}%`}</span>
         </div>
         <div style={{ height: "8px", borderRadius: "4px", background: "#e5e7eb", overflow: "hidden" }}>
-          <div style={{ height: "100%", borderRadius: "4px", background: data.completionPercentage >= 80 ? "#10b981" : data.completionPercentage >= 50 ? "#f59e0b" : "#ef4444", width: `${data.completionPercentage}%`, transition: "width 0.5s" }} />
+          <div style={{ height: "100%", borderRadius: "4px", background: data.completionPercentage >= 80 ? "#10b981" : data.completionPercentage >= 50 ? "#f59e0b" : "#ef4444", width: `${String(data.completionPercentage)}%`, transition: "width 0.5s" }} />
         </div>
       </div>
 
@@ -91,9 +91,9 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
               <div key={priority} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span style={{ width: "80px", fontSize: "12px", color: "#374151" }}>{priority}</span>
                 <div style={{ flex: 1, height: "6px", borderRadius: "3px", background: "#e5e7eb", overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: "3px", background: priorityColors[priority] || "#9ca3af", width: `${(count / maxPriorityCount) * 100}%` }} />
+                  <div style={{ height: "100%", borderRadius: "3px", background: priorityColors[priority] ?? "#9ca3af", width: `${String((count / maxPriorityCount) * 100)}%` }} />
                 </div>
-                <span style={{ width: "24px", textAlign: "right", fontSize: "12px", color: "#6b7280", fontWeight: 600 }}>{count}</span>
+                <span style={{ width: "24px", textAlign: "right", fontSize: "12px", color: "#6b7280", fontWeight: 600 }}>{String(count)}</span>
               </div>
             ))}
           </div>
@@ -110,7 +110,7 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
             {data.tasksByAssignee.slice(0, 5).map((a) => (
               <div key={a.userId} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #f3f4f6", fontSize: "13px" }}>
                 <span>{a.name}</span>
-                <span style={{ color: "#6b7280", fontWeight: 600 }}>{a.taskCount} tasks</span>
+                <span style={{ color: "#6b7280", fontWeight: 600 }}>{`${String(a.taskCount)} tasks`}</span>
               </div>
             ))}
           </div>
