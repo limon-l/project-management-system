@@ -4,7 +4,7 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import rateLimit from "@fastify/rate-limit";
 import multipart from "@fastify/multipart";
-import { connectDatabase } from "./config/database.js";
+import { connectDatabase, disconnectDatabase } from "./config/database.js";
 import { getEnv, validateEnv } from "./config/env.js";
 import { registerRoutes } from "./routes/index.js";
 import { errorHandler } from "./middleware/index.js";
@@ -83,6 +83,12 @@ async function main() {
   // Graceful shutdown
   const shutdown = async () => {
     logger.info("Shutting down...");
+    try {
+      await disconnectDatabase();
+      logger.info("Disconnected from MongoDB");
+    } catch (err) {
+      logger.error({ err }, "Error disconnecting from MongoDB");
+    }
     await app.close();
     httpServer.close();
     process.exit(0);

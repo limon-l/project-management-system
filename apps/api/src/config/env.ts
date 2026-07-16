@@ -1,6 +1,15 @@
 import { config } from "dotenv";
 import { z } from "zod";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load environment variables from workspace root .env if present
+config({ path: path.resolve(__dirname, "../../../.env") });
+// Load environment variables from package root .env if present (as fallback or overrides)
+config({ path: path.resolve(__dirname, "../../.env") });
+// Load environment variables from current working directory as standard fallback
 config();
 
 const envSchema = z.object({

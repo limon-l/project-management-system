@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import mongoose from "mongoose";
 import { authRoutes } from "./auth.routes.js";
 import { workspaceRoutes } from "./workspace.routes.js";
 import { projectRoutes } from "./project.routes.js";
@@ -45,6 +46,12 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
   // Health check
   app.get("/api/health", async (_request, reply) => {
-    reply.send({ status: "ok", timestamp: new Date().toISOString() });
+    const dbStatus = (mongoose.connection.readyState as any) === 1 ? "connected" : "disconnected";
+    const status = dbStatus === "connected" ? "ok" : "error";
+    reply.status(status === "ok" ? 200 : 503).send({
+      status,
+      database: dbStatus,
+      timestamp: new Date().toISOString()
+    });
   });
 }
