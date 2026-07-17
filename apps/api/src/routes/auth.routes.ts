@@ -18,7 +18,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       reply.setCookie("session", result.sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 days
       });
@@ -42,7 +42,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       reply.setCookie("session", result.sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
       });
@@ -61,7 +61,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     if (sessionToken) {
       await logout(sessionToken);
     }
-    reply.clearCookie("session", { path: "/" });
+    reply.clearCookie("session", { path: "/", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", secure: process.env.NODE_ENV === "production" });
     sendSuccess(reply, { message: "Logged out" });
   });
 

@@ -31,7 +31,7 @@ export async function authMiddleware(
   }).lean();
 
   if (!session) {
-    reply.clearCookie("session", { path: "/" });
+    reply.clearCookie("session", { path: "/", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", secure: process.env.NODE_ENV === "production" });
     sendError(reply, 401, ERROR_CODES.UNAUTHORIZED, "Invalid or expired session");
     return;
   }
