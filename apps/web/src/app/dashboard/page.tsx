@@ -63,7 +63,7 @@ export default function DashboardPage() {
           setProjectName("");
           setProjectKey("");
           router.push(
-            `/workspaces/${String(selectedWorkspace)}/projects/${String(project.id)}/board`
+            `/workspaces/${selectedWorkspace}/projects/${project.id}/board`
           );
         },
       }
@@ -241,7 +241,7 @@ export default function DashboardPage() {
                   {projects.map((project: Project) => (
                     <Link
                       key={project.id}
-                      href={`/workspaces/${String(selectedWorkspace)}/projects/${String(project.id)}/board`}
+                      href={`/workspaces/${selectedWorkspace}/projects/${project.id}/board`}
                       className="group rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-md"
                     >
                       <div className="flex items-center gap-2">

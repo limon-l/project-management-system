@@ -157,7 +157,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
               {projectResults.map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => { router.push(`/workspaces/${String(workspaceIds[0])}/projects/${String(p.id)}`); onClose(); }}
+                  onClick={() => { router.push(`/workspaces/${workspaceIds[0]}/projects/${p.id}`); onClose(); }}
                   style={{
                     display: "block",
                     width: "100%",
@@ -183,7 +183,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
               {taskResults.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => { router.push(`/workspaces/${String(workspaceIds[0])}/projects/${String(t.projectId)}?task=${String(t.id)}`); onClose(); }}
+                  onClick={() => { router.push(`/workspaces/${workspaceIds[0]}/projects/${t.projectId}?task=${t.id}`); onClose(); }}
                   style={{
                     display: "block",
                     width: "100%",

@@ -118,11 +118,11 @@ export function Board({
 
         if (prev) {
           newPosition = String(
-            Math.floor((parseInt(prev.position) + parseInt(curr!.position)) / 2)
+            Math.floor((parseInt(prev.position) + parseInt(curr?.position ?? "0")) / 2)
           ).padStart(7, "0");
         } else {
           newPosition = String(Math.floor(
-            parseInt(curr!.position) / 2)).padStart(7, "0") ?? "0000500";
+            parseInt(curr?.position ?? "0") / 2)).padStart(7, "0");
         }
       }
 

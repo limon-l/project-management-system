@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 type SortField = "key" | "title" | "priority" | "dueDate" | "assignee";
 type SortDirection = "asc" | "desc";
 
-const priorityOrder: Record<string, number> = {
+const priorityOrder: Record<string, number | undefined> = {
   URGENT: 0,
   HIGH: 1,
   MEDIUM: 2,
@@ -25,7 +25,7 @@ const priorityOrder: Record<string, number> = {
   NO_PRIORITY: 4,
 };
 
-const priorityColors: Record<string, string> = {
+const priorityColors: Record<string, string | undefined> = {
   URGENT: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   HIGH: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
   MEDIUM: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -53,7 +53,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
   const columnMap = new Map<string, string>(columns.map((c) => [c.id, c.name]));
 
   const sortedTasks = [...tasks].sort((a, b) => {
-    let comparison = 0;
+    let comparison: number;
     if (sortField === "key") {
       comparison = a.key.localeCompare(b.key);
     } else if (sortField === "title") {
@@ -64,7 +64,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
       const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
       const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
       comparison = aDate - bDate;
-    } else if (sortField === "assignee") {
+    } else {
       const aName = a.assignees?.[0]?.user?.name ?? "";
       const bName = b.assignees?.[0]?.user?.name ?? "";
       comparison = aName.localeCompare(bName);

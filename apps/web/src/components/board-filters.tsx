@@ -25,11 +25,11 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
 
   function apply() {
     onFilterChange({
-      assigneeId: assigneeId ?? undefined,
-      priority: priority ?? undefined,
-      labelId: labelId ?? undefined,
+      assigneeId: assigneeId || undefined,
+      priority: priority || undefined,
+      labelId: labelId || undefined,
       completed: completed === "" ? undefined : completed === "true",
-      search: search ?? undefined,
+      search: search || undefined,
     });
   }
 

@@ -129,7 +129,7 @@ export default function MyWorkPage() {
 
       {groupOrder.map((key) => {
         const section = groups[key];
-        if (!section || section.length === 0) return null;
+        if (section.length === 0) return null;
         return (
           <div key={key} style={{ marginBottom: "32px" }}>
             <h2 style={{ fontSize: "14px", fontWeight: 600, color: "#6b7280", margin: "0 0 12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>

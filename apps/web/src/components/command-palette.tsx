@@ -60,10 +60,11 @@ export function CommandPalette() {
 
   const items: CommandItem[] = [
     ...tasks
-      .filter((t) =>
-        t.title.toLowerCase().includes(query.toLowerCase()) ||
-        t.key.toLowerCase().includes(query.toLowerCase())
-      )
+      .filter((t) => {
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- boolean OR, not value coalescing
+        return t.title.toLowerCase().includes(query.toLowerCase()) ||
+        t.key.toLowerCase().includes(query.toLowerCase());
+      })
       .slice(0, 5)
       .map((task) => {
         const project = projects.find((p) => p.id === task.projectId);

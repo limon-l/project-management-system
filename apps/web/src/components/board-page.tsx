@@ -32,7 +32,6 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
   const moveTask = useMoveTask(projectId);
   const createTask = useCreateTask(projectId);
 
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null);
 

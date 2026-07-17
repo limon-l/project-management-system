@@ -160,7 +160,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
                 {a.originalName}
               </div>
               <div style={{ fontSize: "11px", color: "#9ca3af" }}>
-                {formatBytes(a.size)} by {a.uploader?.name ?? "Unknown"}
+                {formatBytes(a.size)} by {a.uploader.name}
               </div>
             </div>
 
