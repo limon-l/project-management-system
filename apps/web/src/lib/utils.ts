@@ -73,7 +73,7 @@ export async function apiArray<T>(
   path: string,
   options: RequestOptions = {}
 ): Promise<T[]> {
-  const data = await api<unknown>(path, options);
+  const data = await api(path, options);
   if (!Array.isArray(data)) {
     throw new ApiError(502, `Invalid list response from ${path}`);
   }

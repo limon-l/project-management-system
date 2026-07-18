@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
+import nextPlugin from "@next/eslint-plugin-next";
 
 export default tseslint.config(
   js.configs.recommended,
@@ -26,6 +27,16 @@ export default tseslint.config(
       "**/*.js",
       "**/*.mjs",
     ],
+  },
+  {
+    files: ["apps/web/**/*.ts", "apps/web/**/*.tsx"],
+    plugins: {
+      "@next/next": nextPlugin,
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
+    },
   },
   {
     rules: {
