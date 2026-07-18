@@ -38,6 +38,10 @@ const userSchema = new Schema<IUser>(
     toJSON: {
       transform(_doc, ret) {
         const safe = ret as Record<string, unknown>;
+        // Capture the identifier before removing MongoDB internals.  Reading
+        // `ret._id` after it has been deleted caused every login/registration
+        // response to throw while serializing the user document.
+        const id = (ret as { _id: { toString(): string } })._id.toString();
         for (const key of [
           "passwordHash",
           "emailVerificationToken",
@@ -49,7 +53,7 @@ const userSchema = new Schema<IUser>(
         ]) {
           Reflect.deleteProperty(safe, key);
         }
-        safe.id = (ret as { _id: { toString(): string } })._id.toString();
+        safe.id = id;
         return safe;
       },
     },

@@ -1,5 +1,4 @@
 import Fastify from "fastify";
-import { createServer } from "http";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import rateLimit from "@fastify/rate-limit";
@@ -75,9 +74,9 @@ async function main() {
   await connectDatabase();
   logger.info("Connected to MongoDB");
 
-  // Create HTTP server and attach Socket.IO
-  const httpServer = createServer(app.server);
-  initSocketIO(httpServer);
+  // Attach Socket.IO to Fastify's actual listening server. Creating a second
+  // HTTP server here leaves Socket.IO on an unbound listener in production.
+  initSocketIO(app.server);
 
   // Start server
   await app.listen({ port: env.API_PORT, host: env.API_HOST });
@@ -93,7 +92,6 @@ async function main() {
       logger.error({ err }, "Error disconnecting from MongoDB");
     }
     await app.close();
-    httpServer.close();
     process.exit(0);
   };
 

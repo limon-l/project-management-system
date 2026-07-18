@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { API_URL as API } from "@/lib/utils";
 
 interface Notification {
   id: string;
@@ -40,7 +41,6 @@ const NotificationContext = createContext<NotificationContextValue>({
   loading: false,
 });
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export function useNotifications() {
   return useContext(NotificationContext);

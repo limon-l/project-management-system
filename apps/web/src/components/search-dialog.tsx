@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/use-auth";
+import { API_URL as API } from "@/lib/utils";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface SearchResult {
   tasks?: { id: string; key: string; title: string; projectId: string }[];

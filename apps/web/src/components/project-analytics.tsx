@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_URL as API } from "@/lib/utils";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 interface ProjectAnalytics {
   totalTasks: number;

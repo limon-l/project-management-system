@@ -1,6 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { Session } from "../models/index.js";
-import { sendError } from "../utils/helpers.js";
+import { sendError, getClearCookieOptions } from "../utils/helpers.js";
 import { ERROR_CODES } from "@boardflow/shared";
 
 export interface AuthenticatedUser {
@@ -31,8 +31,13 @@ export async function authMiddleware(
   }).lean();
 
   if (!session) {
-    reply.clearCookie("session", { path: "/", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", secure: process.env.NODE_ENV === "production" });
-    sendError(reply, 401, ERROR_CODES.UNAUTHORIZED, "Invalid or expired session");
+    reply.clearCookie("session", getClearCookieOptions());
+    sendError(
+      reply,
+      401,
+      ERROR_CODES.UNAUTHORIZED,
+      "Invalid or expired session"
+    );
     return;
   }
 

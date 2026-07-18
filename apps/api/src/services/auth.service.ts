@@ -2,35 +2,79 @@ import argon2 from "argon2";
 import { nanoid } from "nanoid";
 import { User, Session } from "../models/index.js";
 import { AppError, validate } from "../utils/helpers.js";
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@boardflow/shared";
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "@boardflow/shared";
 import { getEnv } from "../config/env.js";
+import { logger } from "../utils/logger.js";
 
 function generateSessionToken(): string {
   return nanoid(64);
 }
 
-export async function register(input: unknown): Promise<{ user: ReturnType<typeof User.prototype.toJSON>; sessionToken: string }> {
+export async function register(
+  input: unknown
+): Promise<{
+  user: ReturnType<typeof User.prototype.toJSON>;
+  sessionToken: string;
+}> {
   const data = validate(registerSchema, input);
 
   const existing = await User.findOne({ email: data.email.toLowerCase() });
   if (existing) {
-    throw new AppError(409, "CONFLICT", "Email already registered");
+    throw new AppError(
+      409,
+      "CONFLICT",
+      "An account with this email already exists. Please sign in instead."
+    );
   }
 
-  const passwordHash = await argon2.hash(data.password, {
-    type: argon2.argon2id,
-    memoryCost: 65536,
-    timeCost: 3,
-    parallelism: 4,
-  });
+  let passwordHash: string;
+  try {
+    passwordHash = await argon2.hash(data.password, {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+  } catch (err) {
+    logger.error({ err }, "Password hashing failed during registration");
+    throw new AppError(
+      500,
+      "INTERNAL_ERROR",
+      "Registration failed. Please try again."
+    );
+  }
 
-  const user = await User.create({
-    name: data.name,
-    email: data.email.toLowerCase(),
-    passwordHash,
-    emailVerificationToken: nanoid(32),
-    emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-  });
+  let user;
+  try {
+    user = await User.create({
+      name: data.name,
+      email: data.email.toLowerCase(),
+      passwordHash,
+      emailVerificationToken: nanoid(32),
+      emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+  } catch (error) {
+    // The preflight lookup can race with another request.  Preserve the same
+    // clear conflict response for MongoDB's unique-index result.
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: unknown }).code === 11000
+    ) {
+      throw new AppError(
+        409,
+        "CONFLICT",
+        "An account with this email already exists. Please sign in instead."
+      );
+    }
+    throw error;
+  }
 
   const env = getEnv();
   const token = generateSessionToken();
@@ -43,7 +87,14 @@ export async function register(input: unknown): Promise<{ user: ReturnType<typeo
   return { user: user.toJSON(), sessionToken: token };
 }
 
-export async function login(input: unknown, userAgent: string, ip: string): Promise<{ user: ReturnType<typeof User.prototype.toJSON>; sessionToken: string }> {
+export async function login(
+  input: unknown,
+  userAgent: string,
+  ip: string
+): Promise<{
+  user: ReturnType<typeof User.prototype.toJSON>;
+  sessionToken: string;
+}> {
   const data = validate(loginSchema, input);
 
   const user = await User.findOne({ email: data.email.toLowerCase() });
@@ -51,7 +102,14 @@ export async function login(input: unknown, userAgent: string, ip: string): Prom
     throw new AppError(401, "UNAUTHORIZED", "Invalid email or password");
   }
 
-  const valid = await argon2.verify(user.passwordHash, data.password);
+  let valid: boolean;
+  try {
+    valid = await argon2.verify(user.passwordHash, data.password);
+  } catch (err) {
+    logger.error({ err: err, userId: user._id.toString() }, "Password verification failed");
+    throw new AppError(401, "UNAUTHORIZED", "Invalid email or password");
+  }
+
   if (!valid) {
     throw new AppError(401, "UNAUTHORIZED", "Invalid email or password");
   }
@@ -74,7 +132,7 @@ export async function logout(sessionToken: string): Promise<void> {
 }
 
 export async function getCurrentUser(userId: string) {
-  const user = await User.findById(userId).lean();
+  const user = await User.findById(userId);
   if (!user) {
     throw new AppError(404, "NOT_FOUND", "User not found");
   }
@@ -104,15 +162,29 @@ export async function resetPassword(input: unknown) {
   });
 
   if (!user) {
-    throw new AppError(400, "BAD_REQUEST", "Invalid or expired reset token");
+    throw new AppError(
+      400,
+      "BAD_REQUEST",
+      "Invalid or expired reset token"
+    );
   }
 
-  const passwordHash = await argon2.hash(data.password, {
-    type: argon2.argon2id,
-    memoryCost: 65536,
-    timeCost: 3,
-    parallelism: 4,
-  });
+  let passwordHash: string;
+  try {
+    passwordHash = await argon2.hash(data.password, {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+  } catch (err) {
+    logger.error({ err }, "Password hashing failed during reset");
+    throw new AppError(
+      500,
+      "INTERNAL_ERROR",
+      "Password reset failed. Please try again."
+    );
+  }
 
   user.passwordHash = passwordHash;
   user.passwordResetToken = null;
@@ -130,7 +202,11 @@ export async function verifyEmail(token: string) {
   });
 
   if (!user) {
-    throw new AppError(400, "BAD_REQUEST", "Invalid or expired verification token");
+    throw new AppError(
+      400,
+      "BAD_REQUEST",
+      "Invalid or expired verification token"
+    );
   }
 
   user.emailVerified = true;

@@ -8,19 +8,46 @@ export async function errorHandler(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  if ("statusCode" in error && typeof (error as Record<string, unknown>).statusCode === "number") {
-    const appError = error as unknown as { statusCode: number; code: string; message: string; details?: Record<string, string[]> };
-    sendError(reply, appError.statusCode, appError.code, appError.message, appError.details);
+  if (
+    "statusCode" in error &&
+    typeof (error as Record<string, unknown>).statusCode === "number"
+  ) {
+    const appError = error as unknown as {
+      statusCode: number;
+      code: string;
+      message: string;
+      details?: Record<string, string[]>;
+    };
+    sendError(
+      reply,
+      appError.statusCode,
+      appError.code,
+      appError.message,
+      appError.details
+    );
     return;
   }
 
   if ("validation" in error) {
-    sendError(reply, 400, ERROR_CODES.VALIDATION_ERROR, "Request validation failed");
+    sendError(
+      reply,
+      400,
+      ERROR_CODES.VALIDATION_ERROR,
+      "Request validation failed"
+    );
     return;
   }
 
   const requestId = request.id;
-  logger.error({ error: error.message, requestId }, "Unhandled error");
+  logger.error(
+    {
+      err: error,
+      requestId,
+      url: request.url,
+      method: request.method,
+    },
+    "Unhandled error"
+  );
 
   sendError(
     reply,

@@ -7,6 +7,20 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
 export function getSocket(): Socket<ServerToClientEvents, ClientToServerEvents> {
   socket ??= io(SOCKET_URL, {
+    auth: async (callback) => {
+      try {
+        const response = await fetch("/api/auth/socket-token", {
+          credentials: "include",
+        });
+        const body = (await response.json()) as {
+          success?: boolean;
+          data?: { token?: string };
+        };
+        callback(body.success && body.data?.token ? { token: body.data.token } : {});
+      } catch {
+        callback({});
+      }
+    },
     withCredentials: true,
     transports: ["websocket", "polling"],
     reconnection: true,

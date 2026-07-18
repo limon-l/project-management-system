@@ -18,6 +18,19 @@ const nextConfig = {
 
   poweredByHeader: false,
 
+  async rewrites() {
+    const apiTarget = process.env.API_PROXY_TARGET ?? process.env.NEXT_PUBLIC_API_URL;
+
+    if (!apiTarget) return [];
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${apiTarget.replace(/\/$/, "")}/api/:path*`,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

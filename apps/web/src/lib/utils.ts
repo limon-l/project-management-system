@@ -5,7 +5,10 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+// Keep browser requests same-origin. Next.js proxies /api to the backend,
+// allowing the httpOnly session cookie to work even when the API is hosted on
+// a different provider/domain.
+export const API_URL = "";
 
 export class ApiError extends Error {
   constructor(

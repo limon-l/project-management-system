@@ -1,5 +1,6 @@
 import type { Socket } from "socket.io";
 import { Session, WorkspaceMember, ProjectMember } from "../models/index.js";
+import { verifySocketToken } from "../utils/helpers.js";
 
 export interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -10,23 +11,25 @@ export async function verifySocketSession(
   socket: AuthenticatedSocket,
   next: (err?: Error) => void
 ): Promise<void> {
+  const socketToken = verifySocketToken(socket.handshake.auth?.token);
   const cookie = socket.handshake.headers.cookie;
-  if (!cookie) {
+  const sessionToken = /session=([^;]+)/.exec(cookie ?? "")?.[1];
+
+  if (!socketToken && !sessionToken) {
     return next(new Error("Authentication required"));
   }
-
-  const match = /session=([^;]+)/.exec(cookie);
-  if (!match) {
-    return next(new Error("Authentication required"));
-  }
-
-  const sessionToken = match[1];
 
   try {
-    const session = await Session.findOne({
-      token: sessionToken,
-      expiresAt: { $gt: new Date() },
-    }).lean();
+    const session = socketToken
+      ? await Session.findOne({
+          _id: socketToken.sessionId,
+          userId: socketToken.userId,
+          expiresAt: { $gt: new Date() },
+        }).lean()
+      : await Session.findOne({
+          token: sessionToken,
+          expiresAt: { $gt: new Date() },
+        }).lean();
 
     if (!session) {
       return next(new Error("Invalid or expired session"));

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { AppHeader } from "./app-header";
 import { CommandPalette } from "./command-palette";
 
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/privacy", "/terms"];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();

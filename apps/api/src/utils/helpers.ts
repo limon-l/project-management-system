@@ -1,4 +1,5 @@
 import type { FastifyReply } from "fastify";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { ZodError, type ZodSchema } from "zod";
 import { ERROR_CODES, type ApiResponse } from "@boardflow/shared";
 
@@ -104,4 +105,104 @@ export function midpointPosition(before: string, after: string): string {
     return String(a + 1).padStart(6, "0");
   }
   return String(Math.floor((a + b) / 2)).padStart(6, "0");
+}
+
+export interface CookieOptions {
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: "none" | "lax" | "strict";
+  path: string;
+  maxAge: number;
+}
+
+export interface ClearCookieOptions {
+  path: string;
+  sameSite: "none" | "lax" | "strict";
+  secure: boolean;
+}
+
+function isSecureOrigin(): boolean {
+  const isProduction = process.env.NODE_ENV === "production";
+  const corsOrigins = process.env.CORS_ORIGIN || "";
+  const hasHttpsOrigin = corsOrigins
+    .split(",")
+    .some((o) => o.trim().startsWith("https://"));
+  return isProduction || hasHttpsOrigin;
+}
+
+export function getCookieOptions(): CookieOptions {
+  const secure = isSecureOrigin();
+  return {
+    httpOnly: true,
+    secure,
+    // Browser API traffic is proxied through the Next.js origin.  Lax avoids
+    // relying on third-party cookies while retaining CSRF protection.
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  };
+}
+
+export function getClearCookieOptions(): ClearCookieOptions {
+  const secure = isSecureOrigin();
+  return {
+    path: "/",
+    sameSite: "lax",
+    secure,
+  };
+}
+
+interface SocketTokenPayload {
+  userId: string;
+  sessionId: string;
+  expiresAt: number;
+}
+
+/** Creates a short-lived credential for the cross-origin Socket.IO handshake. */
+export function createSocketToken(userId: string, sessionId: string): string {
+  const payload: SocketTokenPayload = {
+    userId,
+    sessionId,
+    expiresAt: Date.now() + 5 * 60 * 1000,
+  };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = createHmac("sha256", process.env.SESSION_SECRET ?? "")
+    .update(encoded)
+    .digest("base64url");
+  return `${encoded}.${signature}`;
+}
+
+export function verifySocketToken(token: unknown): SocketTokenPayload | null {
+  if (typeof token !== "string") return null;
+  const [encoded, signature] = token.split(".");
+  if (!encoded || !signature || token.split(".").length !== 2) return null;
+
+  const expected = createHmac("sha256", process.env.SESSION_SECRET ?? "")
+    .update(encoded)
+    .digest("base64url");
+  const signatureBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (
+    signatureBuffer.length !== expectedBuffer.length ||
+    !timingSafeEqual(signatureBuffer, expectedBuffer)
+  ) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(encoded, "base64url").toString("utf8")
+    ) as SocketTokenPayload;
+    if (
+      typeof payload.userId !== "string" ||
+      typeof payload.sessionId !== "string" ||
+      typeof payload.expiresAt !== "number" ||
+      payload.expiresAt <= Date.now()
+    ) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
 }
