@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/utils";
+import { apiArray } from "@/lib/utils";
 
 export interface ProjectMember {
   id: string;
@@ -15,7 +15,7 @@ export interface ProjectMember {
 export function useProjectMembers(projectId: string) {
   return useQuery({
     queryKey: ["projectMembers", projectId],
-    queryFn: () => api<ProjectMember[]>(`/api/projects/${projectId}/members`),
+    queryFn: () => apiArray<ProjectMember>(`/api/projects/${projectId}/members`),
     enabled: !!projectId,
   });
 }

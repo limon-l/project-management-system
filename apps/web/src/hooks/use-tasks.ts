@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/utils";
+import { api, apiArray } from "@/lib/utils";
 
 export interface TaskAssignee {
   id: string;
@@ -70,7 +70,7 @@ export interface Comment {
 export function useProjectTasks(projectId: string) {
   return useQuery({
     queryKey: ["tasks", projectId],
-    queryFn: () => api<Task[]>(`/api/projects/${projectId}/tasks`),
+    queryFn: () => apiArray<Task>(`/api/projects/${projectId}/tasks`),
     enabled: !!projectId,
   });
 }
@@ -78,7 +78,7 @@ export function useProjectTasks(projectId: string) {
 export function useProjectColumns(projectId: string) {
   return useQuery({
     queryKey: ["columns", projectId],
-    queryFn: () => api<Column[]>(`/api/projects/${projectId}/columns`),
+    queryFn: () => apiArray<Column>(`/api/projects/${projectId}/columns`),
     enabled: !!projectId,
   });
 }
@@ -94,7 +94,7 @@ export function useTaskDetail(taskId: string | null) {
 export function useTaskChecklist(taskId: string | null) {
   return useQuery({
     queryKey: ["checklist", taskId],
-    queryFn: () => api<ChecklistItem[]>(`/api/tasks/${taskId}/checklist`),
+    queryFn: () => apiArray<ChecklistItem>(`/api/tasks/${taskId}/checklist`),
     enabled: !!taskId,
   });
 }

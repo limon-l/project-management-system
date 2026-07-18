@@ -17,9 +17,6 @@ const navItems = [
   { label: "Board", suffix: "/board" },
   { label: "List", suffix: "/list" },
   { label: "Analytics", suffix: "/analytics" },
-  { label: "Members", suffix: "/members" },
-  { label: "Activity", suffix: "/activity" },
-  { label: "Settings", suffix: "/settings" },
 ];
 
 export function ProjectLayout({

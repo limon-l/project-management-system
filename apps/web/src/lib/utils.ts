@@ -65,6 +65,21 @@ export async function api<T = unknown>(
   return data.data;
 }
 
+/**
+ * Enforces the list contract at the API boundary so components never receive
+ * an object or null value where they expect to call array methods.
+ */
+export async function apiArray<T>(
+  path: string,
+  options: RequestOptions = {}
+): Promise<T[]> {
+  const data = await api<unknown>(path, options);
+  if (!Array.isArray(data)) {
+    throw new ApiError(502, `Invalid list response from ${path}`);
+  }
+  return data as T[];
+}
+
 export function formatDate(date: string | Date): string {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",

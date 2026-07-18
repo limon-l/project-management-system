@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/utils";
+import { api, apiArray } from "@/lib/utils";
 
 export interface Project {
   id: string;
@@ -21,7 +21,7 @@ export function useProjects(workspaceId: string) {
   return useQuery({
     queryKey: ["projects", workspaceId],
     queryFn: () =>
-      api<Project[]>(`/api/workspaces/${workspaceId}/projects`),
+      apiArray<Project>(`/api/workspaces/${workspaceId}/projects`),
     enabled: !!workspaceId,
   });
 }

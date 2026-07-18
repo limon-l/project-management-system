@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { API_URL as API } from "@/lib/utils";
+import { api } from "@/lib/utils";
 
 interface Notification {
   id: string;
@@ -65,12 +65,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     async function fetchNotifications() {
       setLoading(true);
       try {
-        const res = await fetch(`${API}/api/notifications`, {
-          credentials: "include",
-        });
-        const json = await res.json();
-        if (!cancelled && json.success) {
-          setNotifications(json.data);
+        const page = await api<unknown>("/api/notifications");
+        if (!cancelled) {
+          const items =
+            typeof page === "object" &&
+            page !== null &&
+            "items" in page &&
+            Array.isArray(page.items)
+              ? page.items
+              : [];
+          setNotifications(items as Notification[]);
         }
       } catch {
         // silent
@@ -95,11 +99,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       );
 
       try {
-        await fetch(`${API}/api/notifications/read`, {
+        await api("/api/notifications/read", {
           method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids: toMark }),
+          body: { notificationIds: toMark },
         });
       } catch {
         // silent — optimistic update already applied
