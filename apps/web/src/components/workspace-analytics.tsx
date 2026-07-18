@@ -14,8 +14,17 @@ interface WorkspaceAnalytics {
   tasksCompletedThisWeek: number;
   tasksByStatus: Record<string, number>;
   tasksByPriority: Record<string, number>;
-  workloadByMember: { userId: string; name: string; taskCount: number }[];
-  upcomingDeadlines: { taskId: string; taskKey: string; title: string; dueDate: string }[];
+  workloadByMember: {
+    userId: string;
+    name: string;
+    taskCount: number;
+  }[];
+  upcomingDeadlines: {
+    taskId: string;
+    taskKey: string;
+    title: string;
+    dueDate: string;
+  }[];
   recentActivity: number;
 }
 
@@ -26,9 +35,10 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`${API}/api/workspaces/${workspaceId}/analytics`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `${API}/api/workspaces/${workspaceId}/analytics`,
+          { credentials: "include" },
+        );
         const json = await res.json();
         if (json.success) setData(json.data);
       } catch {
@@ -40,43 +50,97 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
     load();
   }, [workspaceId]);
 
-  if (loading) return <div style={{ padding: "16px", color: "#9ca3af", fontSize: "13px" }}>Loading analytics...</div>;
+  if (loading)
+    return (
+      <div className="p-4 text-[13px] text-muted-foreground">
+        Loading analytics...
+      </div>
+    );
   if (!data) return null;
 
-  return (
-    <div style={{ marginBottom: "32px" }}>
-      <h2 style={{ fontSize: "16px", fontWeight: 600, margin: "0 0 16px" }}>Workspace Overview</h2>
+  const maxPriority = Math.max(1, ...Object.values(data.tasksByPriority));
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
-        {[
-          { label: "Projects", value: data.totalProjects, sub: `${data.activeProjects} active`, color: "#3b82f6" },
-          { label: "Total Tasks", value: data.totalTasks, sub: `${data.completedTasks} completed`, color: "#374151" },
-          { label: "Overdue", value: data.overdueTasks, sub: `${data.tasksCompletedThisWeek} done this week`, color: data.overdueTasks > 0 ? "#ef4444" : "#9ca3af" },
-          { label: "Activity", value: data.recentActivity, sub: "events this week", color: "#8b5cf6" },
-        ].map((s) => (
-          <div key={s.label} style={{ padding: "16px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-            <div style={{ fontSize: "28px", fontWeight: 700, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: "13px", color: "#374151", fontWeight: 500, marginTop: "2px" }}>{s.label}</div>
-            <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>{s.sub}</div>
+  const summaryCards = [
+    {
+      label: "Projects",
+      value: data.totalProjects,
+      sub: `${data.activeProjects} active`,
+      colorClass: "text-primary",
+    },
+    {
+      label: "Total Tasks",
+      value: data.totalTasks,
+      sub: `${data.completedTasks} completed`,
+      colorClass: "text-foreground",
+    },
+    {
+      label: "Overdue",
+      value: data.overdueTasks,
+      sub: `${data.tasksCompletedThisWeek} done this week`,
+      colorClass: data.overdueTasks > 0 ? "text-destructive" : "text-muted-foreground",
+    },
+    {
+      label: "Activity",
+      value: data.recentActivity,
+      sub: "events this week",
+      colorClass: "text-purple-500",
+    },
+  ];
+
+  const priorityColorMap: Record<string, string> = {
+    URGENT: "bg-destructive",
+    HIGH: "bg-orange-500",
+    MEDIUM: "bg-yellow-500",
+    LOW: "bg-muted-foreground",
+  };
+
+  return (
+    <div className="mb-8 animate-fade-in">
+      <h2 className="mb-4 text-base font-semibold">Workspace Overview</h2>
+
+      <div className="mb-5 grid grid-cols-4 gap-3">
+        {summaryCards.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-lg border border-border p-4 card-hover"
+          >
+            <div className={`text-3xl font-bold ${s.colorClass}`}>
+              {s.value}
+            </div>
+            <div className="mt-0.5 text-[13px] font-medium text-foreground">
+              {s.label}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted-foreground">
+              {s.sub}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+      <div className="grid grid-cols-2 gap-4">
         {/* Tasks by priority */}
         {Object.keys(data.tasksByPriority).length > 0 && (
-          <div style={{ padding: "16px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", margin: "0 0 12px", textTransform: "uppercase" }}>
+          <div className="rounded-lg border border-border p-4">
+            <h3 className="mb-3 text-xs font-semibold uppercase text-muted-foreground">
               Tasks by Priority
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div className="flex flex-col gap-2">
               {Object.entries(data.tasksByPriority).map(([p, c]) => (
-                <div key={p} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ width: "80px", fontSize: "12px" }}>{p}</span>
-                  <div style={{ flex: 1, height: "6px", borderRadius: "3px", background: "#e5e7eb" }}>
-                    <div style={{ height: "100%", borderRadius: "3px", background: p === "URGENT" ? "#ef4444" : p === "HIGH" ? "#f97316" : p === "MEDIUM" ? "#eab308" : "#9ca3af", width: `${Math.min(100, (c / Math.max(1, ...Object.values(data.tasksByPriority))) * 100)}%` }} />
+                <div key={p} className="flex items-center gap-2">
+                  <span className="w-20 text-xs">{p}</span>
+                  <div className="h-1.5 flex-1 rounded-full bg-border">
+                    <div
+                      className={`h-full rounded-full ${
+                        priorityColorMap[p] ?? "bg-muted-foreground"
+                      }`}
+                      style={{
+                        width: `${Math.min(100, (c / maxPriority) * 100)}%`,
+                      }}
+                    />
                   </div>
-                  <span style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280" }}>{c}</span>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    {c}
+                  </span>
                 </div>
               ))}
             </div>
@@ -85,18 +149,23 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
 
         {/* Upcoming deadlines */}
         {data.upcomingDeadlines.length > 0 && (
-          <div style={{ padding: "16px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", margin: "0 0 12px", textTransform: "uppercase" }}>
+          <div className="rounded-lg border border-border p-4">
+            <h3 className="mb-3 text-xs font-semibold uppercase text-muted-foreground">
               Upcoming Deadlines
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div className="flex flex-col gap-1.5">
               {data.upcomingDeadlines.slice(0, 5).map((t) => (
-                <div key={t.taskId} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", padding: "4px 0", borderBottom: "1px solid #f3f4f6" }}>
+                <div
+                  key={t.taskId}
+                  className="flex justify-between border-b border-accent pb-1 text-[13px]"
+                >
                   <div>
-                    <span style={{ color: "#6b7280", fontWeight: 600, marginRight: "6px" }}>{t.taskKey}</span>
+                    <span className="mr-1.5 font-semibold text-muted-foreground">
+                      {t.taskKey}
+                    </span>
                     {t.title}
                   </div>
-                  <span style={{ color: "#ef4444", fontSize: "12px" }}>
+                  <span className="text-xs text-destructive">
                     {new Date(t.dueDate).toLocaleDateString()}
                   </span>
                 </div>
@@ -107,15 +176,20 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
 
         {/* Workload by member */}
         {data.workloadByMember.length > 0 && (
-          <div style={{ padding: "16px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-            <h3 style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", margin: "0 0 12px", textTransform: "uppercase" }}>
+          <div className="rounded-lg border border-border p-4">
+            <h3 className="mb-3 text-xs font-semibold uppercase text-muted-foreground">
               Workload by Member
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div className="flex flex-col gap-1.5">
               {data.workloadByMember.slice(0, 8).map((m) => (
-                <div key={m.userId} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", padding: "4px 0", borderBottom: "1px solid #f3f4f6" }}>
+                <div
+                  key={m.userId}
+                  className="flex justify-between border-b border-accent pb-1 text-[13px]"
+                >
                   <span>{m.name}</span>
-                  <span style={{ fontWeight: 600, color: "#6b7280" }}>{m.taskCount} tasks</span>
+                  <span className="font-semibold text-muted-foreground">
+                    {m.taskCount} tasks
+                  </span>
                 </div>
               ))}
             </div>

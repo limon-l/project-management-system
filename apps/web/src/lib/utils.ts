@@ -7,6 +7,17 @@ export function cn(...inputs: ClassValue[]): string {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
+export class ApiError extends Error {
+  constructor(
+    public statusCode: number,
+    message: string,
+    public code?: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 interface RequestOptions {
   method?: string;
   body?: unknown;
@@ -28,6 +39,19 @@ export async function api<T = unknown>(
     credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   });
+
+  if (!res.ok) {
+    let errorMsg = "API request failed";
+    let errorCode: string | undefined;
+    try {
+      const errData = await res.json() as { success: boolean; error?: { message?: string; code?: string } };
+      errorMsg = errData.error?.message ?? errorMsg;
+      errorCode = errData.error?.code;
+    } catch {
+      errorMsg = res.statusText || errorMsg;
+    }
+    throw new ApiError(res.status, errorMsg, errorCode);
+  }
 
   const data = await res.json() as { success: boolean; data: T; error?: { message?: string } };
 

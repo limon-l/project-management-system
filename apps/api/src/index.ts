@@ -34,12 +34,15 @@ async function main() {
     reply.header("Referrer-Policy", "strict-origin-when-cross-origin");
     reply.header(
       "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains"
+      "max-age=31536000; includeSubDomains; preload"
     );
-    reply.header(
-      "Content-Security-Policy",
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ws: wss:"
-    );
+    reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    if (env.NODE_ENV === "production") {
+      reply.header(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ws: wss:; frame-ancestors 'none'"
+      );
+    }
   });
 
   // Plugins

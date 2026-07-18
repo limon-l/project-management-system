@@ -30,82 +30,40 @@ export function NotificationBell() {
   }, [setOpen]);
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
+    <div ref={ref} className="relative">
       <button
-        onClick={() => { setOpen(!open); }}
+        onClick={() => setOpen(!open)}
         aria-label={`Notifications ${unreadCount > 0 ? `(${String(unreadCount)} unread)` : ""}`}
-        style={{
-          position: "relative",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "8px",
-          color: "var(--color-text, #333)",
-        }}
+        className="relative cursor-pointer border-none bg-transparent p-2 text-foreground"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unreadCount > 0 && (
-          <span
-            style={{
-              position: "absolute",
-              top: "2px",
-              right: "2px",
-              background: "var(--color-danger, #ef4444)",
-              color: "#fff",
-              fontSize: "11px",
-              borderRadius: "50%",
-              width: "16px",
-              height: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 600,
-            }}
-          >
+          <span className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[11px] font-semibold text-white">
             {unreadCount > 9 ? "9+" : String(unreadCount)}
           </span>
         )}
       </button>
 
       {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            right: 0,
-            width: "360px",
-            maxHeight: "480px",
-            overflow: "auto",
-            background: "#fff",
-            border: "1px solid #e5e7eb",
-            borderRadius: "8px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "12px 16px",
-              borderBottom: "1px solid #e5e7eb",
-            }}
-          >
-            <strong style={{ fontSize: "14px" }}>Notifications</strong>
+        <div className="animate-scale-in absolute right-0 top-full z-50 max-h-[480px] w-[360px] overflow-auto rounded-lg border border-border bg-surface shadow-premium">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <strong className="text-sm">Notifications</strong>
             {unreadCount > 0 && (
               <button
-                onClick={() => { markRead(); }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "12px",
-                  color: "var(--color-primary, #3b82f6)",
-                  cursor: "pointer",
-                }}
+                onClick={() => markRead()}
+                className="cursor-pointer border-none bg-transparent text-xs text-primary"
               >
                 Mark all as read
               </button>
@@ -113,11 +71,11 @@ export function NotificationBell() {
           </div>
 
           {loading ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "#9ca3af", fontSize: "14px" }}>
+            <div className="p-6 text-center text-sm text-muted-foreground">
               Loading...
             </div>
           ) : notifications.length === 0 ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "#9ca3af", fontSize: "14px" }}>
+            <div className="p-6 text-center text-sm text-muted-foreground">
               No notifications yet
             </div>
           ) : (
@@ -127,35 +85,20 @@ export function NotificationBell() {
                 onClick={() => {
                   if (!n.read) markRead([n.id]);
                 }}
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  padding: "12px 16px",
-                  cursor: "pointer",
-                  background: n.read ? "transparent" : "var(--color-bg-subtle, #f0f9ff)",
-                  borderBottom: "1px solid #f3f4f6",
-                  transition: "background 0.15s",
-                }}
+                className={`flex cursor-pointer gap-3 border-b border-accent px-4 py-3 transition-colors ${
+                  n.read ? "bg-transparent" : "bg-primary/5"
+                }`}
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: "13px", lineHeight: 1.4, color: "#374151" }}>
+                <div className="min-w-0 flex-1">
+                  <p className="m-0 text-[13px] leading-relaxed text-foreground">
                     {n.message}
                   </p>
-                  <span style={{ fontSize: "11px", color: "#9ca3af", marginTop: "4px", display: "block" }}>
+                  <span className="mt-1 block text-[11px] text-muted-foreground">
                     {timeAgo(n.createdAt)}
                   </span>
                 </div>
                 {!n.read && (
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      background: "var(--color-primary, #3b82f6)",
-                      flexShrink: 0,
-                      marginTop: "6px",
-                    }}
-                  />
+                  <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                 )}
               </div>
             ))

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { api } from "@/lib/utils";
+import { api, ApiError } from "@/lib/utils";
 
 interface User {
   id: string;
@@ -36,8 +36,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     try {
       const data = await api<{ user: User }>("/api/auth/me");
       setUser(data.user);
-    } catch {
-      setUser(null);
+    } catch (err) {
+      if (err instanceof ApiError && err.statusCode === 401) {
+        setUser(null);
+      } else {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
