@@ -13,7 +13,7 @@ interface WorkspaceAnalytics {
   overdueTasks: number;
   tasksCompletedThisWeek: number;
   tasksByStatus: Record<string, number>;
-  tasksByPriority: Record<string, number>;
+  tasksByPriority: Record<string, number> | null;
   workloadByMember: {
     userId: string;
     name: string;
@@ -120,7 +120,7 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
 
       <div className="grid grid-cols-2 gap-4">
         {/* Tasks by priority */}
-        {Object.keys(data.tasksByPriority).length > 0 && (
+        {data.tasksByPriority && Object.keys(data.tasksByPriority).length > 0 && (
           <div className="rounded-lg border border-border p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase text-muted-foreground">
               Tasks by Priority

@@ -130,6 +130,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
             key={a.id}
             className="flex items-center gap-2.5 rounded-md border border-border bg-muted/30 px-2.5 py-2"
           >
+            {/* eslint-disable @next/next/no-img-element -- dynamic user-uploaded attachment URL */}
             {isImage(a.mimeType) && a.url ? (
               <img
                 src={a.url}
@@ -141,6 +142,7 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
                 {a.originalName.split(".").pop()?.toUpperCase() ?? "FILE"}
               </div>
             )}
+            {/* eslint-enable @next/next/no-img-element */}
 
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-medium">

@@ -8,7 +8,7 @@ import { useWorkspace } from "@/hooks/use-workspace";
 import { useWorkspaceMembers, type WorkspaceMember } from "@/hooks/use-workspace-members";
 import { useWorkspaceRealtime } from "@/hooks/use-realtime";
 
-const ROLE_COLORS: Record<string, string> = {
+const ROLE_COLORS: Partial<Record<string, string>> = {
   WORKSPACE_OWNER: "bg-primary/10 text-primary",
   WORKSPACE_ADMIN: "bg-success/10 text-success",
   PROJECT_MEMBER: "bg-accent text-muted-foreground",

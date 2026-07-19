@@ -84,6 +84,7 @@ async function proxyRequest(request: NextRequest, path: string): Promise<NextRes
   if (contentType) responseHeaders.set("content-type", contentType);
 
   // Forward Set-Cookie headers, rewriting them for the frontend domain
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- getSetCookie may not exist in all runtimes
   const setCookies = backendResponse.headers.getSetCookie?.() ?? [];
   if (setCookies.length > 0) {
     const origin = request.nextUrl.origin;

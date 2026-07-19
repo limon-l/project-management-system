@@ -8,7 +8,7 @@ interface ProjectAnalytics {
   completedTasks: number;
   completionPercentage: number;
   overdueTasks: number;
-  tasksByPriority: Record<string, number>;
+  tasksByPriority: Record<string, number> | null;
   tasksByAssignee: { userId: string; name: string; taskCount: number }[];
   status: string;
 }
@@ -110,7 +110,7 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
       </div>
 
       {/* Tasks by priority */}
-      {Object.keys(data.tasksByPriority).length > 0 && (
+      {data.tasksByPriority && Object.keys(data.tasksByPriority).length > 0 && (
         <div className="mb-5">
           <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Tasks by Priority (incomplete)

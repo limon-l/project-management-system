@@ -42,7 +42,7 @@ export default function MyWorkPage() {
   const [groupBy, setGroupBy] = useState<"dueDate" | "priority" | "project">(
     "dueDate",
   );
-  const [groups, setGroups] = useState<Record<string, Task[]>>({});
+  const [groups, setGroups] = useState<Record<string, Task[] | undefined>>({});
 
   useEffect(() => {
     if (authLoading) return;
