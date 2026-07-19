@@ -39,6 +39,7 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
           `${API}/api/workspaces/${workspaceId}/analytics`,
           { credentials: "include" },
         );
+        if (!res.ok) return;
         const json = await res.json();
         if (json.success) setData(json.data);
       } catch {
@@ -58,7 +59,7 @@ export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
     );
   if (!data) return null;
 
-  const maxPriority = Math.max(1, ...Object.values(data.tasksByPriority));
+  const maxPriority = Math.max(1, ...Object.values(data.tasksByPriority ?? {}));
 
   const summaryCards = [
     {

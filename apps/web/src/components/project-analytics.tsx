@@ -24,6 +24,10 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
         const res = await fetch(`${API}/api/projects/${projectId}/analytics`, {
           credentials: "include",
         });
+        if (!res.ok) {
+          setError("Failed to load analytics");
+          return;
+        }
         const json = await res.json() as { success: boolean; data: ProjectAnalytics };
         if (json.success) setData(json.data);
       } catch {
@@ -53,7 +57,7 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
     NO_PRIORITY: "bg-muted-foreground",
   };
 
-  const maxPriorityCount = Math.max(...Object.values(data.tasksByPriority), 1);
+  const maxPriorityCount = Math.max(...Object.values(data.tasksByPriority ?? {}), 1);
 
   const completionColor =
     data.completionPercentage >= 80

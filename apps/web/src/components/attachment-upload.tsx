@@ -26,6 +26,10 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
       const res = await fetch(`${API}/api/tasks/${taskId}/attachments`, {
         credentials: "include",
       });
+      if (!res.ok) {
+        toast.error("Failed to load attachments");
+        return;
+      }
       const json = await res.json() as { success: boolean; data: { attachments: Attachment[] } };
       if (json.success) setAttachments(json.data.attachments);
     } catch {
@@ -47,6 +51,10 @@ export function AttachmentUpload({ taskId }: { taskId: string }) {
         credentials: "include",
         body: form,
       });
+      if (!res.ok) {
+        toast.error("Upload failed");
+        return;
+      }
       const json = await res.json() as { success: boolean; data: { attachment: Attachment } };
       if (json.success) {
         setAttachments((prev) => [json.data.attachment, ...prev]);

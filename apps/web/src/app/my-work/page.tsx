@@ -59,6 +59,10 @@ export default function MyWorkPage() {
           }),
           fetch(`${API}/api/my-work/summary`, { credentials: "include" }),
         ]);
+        if (!tasksRes.ok || !summaryRes.ok) {
+          setError("Failed to load tasks. Please try again.");
+          return;
+        }
         const tasksJson = (await tasksRes.json()) as {
           success: boolean;
           data: { tasks: Task[]; groups?: Record<string, Task[]> };

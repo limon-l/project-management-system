@@ -18,13 +18,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isPublicPage = PUBLIC_ROUTES.some(
     (route) => route === pathname || pathname.startsWith(route + "/")
   );
-  // Project pages have their own layout (ProjectLayout) with a sidebar,
+  // Workspace and project pages have their own layout with a sidebar,
   // so we hide the global AppHeader to avoid duplicate navigation chrome.
-  const isProjectPage = pathname.includes("/projects/");
+  const isWorkspacePage = pathname.startsWith("/workspaces/");
 
   return (
     <>
-      {!isPublicPage && !isProjectPage && <AppHeader />}
+      {!isPublicPage && !isWorkspacePage && <AppHeader />}
       <main className={isPublicPage ? "min-h-screen" : "min-h-[calc(100vh-56px)]"}>
         {children}
       </main>

@@ -33,8 +33,12 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
   useEffect(() => {
     if (!user) return;
     fetch(`${API}/api/workspaces`, { credentials: "include" })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) return;
+        return r.json();
+      })
       .then((json) => {
+        if (!json) return;
         const data = json as { success: boolean; data: { id: string }[] };
         if (data.success && Array.isArray(data.data)) {
           setWorkspaceIds(data.data.map((w) => w.id));
@@ -51,10 +55,12 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
     setLoading(true);
     try {
       const wid = workspaceIds[0];
+      if (!wid) return;
       const res = await fetch(
         `${API}/api/workspaces/${wid}/search?q=${encodeURIComponent(q)}`,
         { credentials: "include" }
       );
+      if (!res.ok) return;
       const json = await res.json() as { success: boolean; data: SearchResult };
       if (json.success) setResults(json.data);
     } catch {
@@ -157,7 +163,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
               {projectResults.map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => { router.push(`/workspaces/${workspaceIds[0]}/projects/${p.id}`); onClose(); }}
+                  onClick={() => { if (workspaceIds[0]) { router.push(`/workspaces/${workspaceIds[0]}/projects/${p.id}`); onClose(); } }}
                   style={{
                     display: "block",
                     width: "100%",
@@ -183,7 +189,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
               {taskResults.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => { router.push(`/workspaces/${workspaceIds[0]}/projects/${t.projectId}?task=${t.id}`); onClose(); }}
+                  onClick={() => { if (workspaceIds[0]) { router.push(`/workspaces/${workspaceIds[0]}/projects/${t.projectId}?task=${t.id}`); onClose(); } }}
                   style={{
                     display: "block",
                     width: "100%",
