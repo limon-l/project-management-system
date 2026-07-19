@@ -25,7 +25,7 @@ export function BoardFilters({ assignees, labels, onFilterChange }: BoardFilters
   const [search, setSearch] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [presetName, setPresetName] = useState("");
-  const { presets, savePreset, deletePreset } = useSavedFilters();
+  const { presets, savePreset, deletePreset: _deletePreset } = useSavedFilters();
 
   function apply() {
     onFilterChange({

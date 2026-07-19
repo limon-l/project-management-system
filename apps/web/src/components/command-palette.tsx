@@ -137,6 +137,7 @@ export function CommandPalette() {
         id: `project-${project.id}`,
         label: project.name,
         description: project.key,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- TS needs assertion; .map() loses contextual type
         group: "projects" as CommandGroup,
         action: () => {
           setOpen(false);

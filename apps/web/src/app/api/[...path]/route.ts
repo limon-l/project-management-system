@@ -4,7 +4,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 function rewriteCookies(
   setCookies: string[],
-  requestOrigin: string
+  _requestOrigin: string
 ): string[] {
   return setCookies.map((sc) => {
     // Rewrite cookie domain to the frontend origin so the browser
@@ -84,8 +84,8 @@ async function proxyRequest(request: NextRequest, path: string): Promise<NextRes
   if (contentType) responseHeaders.set("content-type", contentType);
 
   // Forward Set-Cookie headers, rewriting them for the frontend domain
-  const setCookies = backendResponse.headers.getSetCookie?.();
-  if (setCookies && setCookies.length > 0) {
+  const setCookies = backendResponse.headers.getSetCookie?.() ?? [];
+  if (setCookies.length > 0) {
     const origin = request.nextUrl.origin;
     const rewritten = rewriteCookies(setCookies, origin);
     for (const sc of rewritten) {

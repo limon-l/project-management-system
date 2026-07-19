@@ -282,7 +282,7 @@ export function useDeleteDependency(projectId: string) {
   return useMutation({
     mutationFn: (dependencyId: string) =>
       api(`/api/dependencies/${dependencyId}`, { method: "DELETE" }),
-    onSuccess: (_data, dependencyId) => {
+    onSuccess: (_data, _dependencyId) => {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
       void queryClient.invalidateQueries({ queryKey: ["dependencies"] });
     },
