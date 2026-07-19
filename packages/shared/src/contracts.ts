@@ -124,7 +124,7 @@ export interface WorkspaceContracts {
   "GET /api/workspaces/:id": {
     response: ApiResponse<{ workspace: WorkspaceResponse }>;
   };
-  "PUT /api/workspaces/:id": {
+  "PATCH /api/workspaces/:id": {
     body: UpdateWorkspaceInput;
     response: ApiResponse<{ workspace: WorkspaceResponse }>;
   };

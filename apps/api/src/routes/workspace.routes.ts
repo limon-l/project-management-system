@@ -4,6 +4,7 @@ import {
   getUserWorkspaces,
   getWorkspaceById,
   updateWorkspace,
+  deleteWorkspace,
   getWorkspaceMembers,
   inviteMember,
   getWorkspaceInvitations,
@@ -31,8 +32,16 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
 
   // List user's workspaces
   app.get("/", { preHandler: [authMiddleware] }, async (request, reply) => {
-    const workspaces = await getUserWorkspaces(request.user!.userId);
-    sendSuccess(reply, workspaces);
+    try {
+      const workspaces = await getUserWorkspaces(request.user!.userId);
+      sendSuccess(reply, workspaces);
+    } catch (error) {
+      if (error instanceof AppError) {
+        sendError(reply, error.statusCode, error.code, error.message);
+        return;
+      }
+      throw error;
+    }
   });
 
   // Get workspace by ID
@@ -51,7 +60,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   });
 
   // Update workspace
-  app.patch("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
+  app.patch("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
       const workspace = await updateWorkspace(workspaceId, request.user!.userId, request.body);
@@ -65,15 +74,38 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
     }
   });
 
+  // Delete workspace
+  app.delete("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
+    try {
+      const { workspaceId } = request.params as { workspaceId: string };
+      const result = await deleteWorkspace(workspaceId, request.user!.userId);
+      sendSuccess(reply, result);
+    } catch (error) {
+      if (error instanceof AppError) {
+        sendError(reply, error.statusCode, error.code, error.message);
+        return;
+      }
+      throw error;
+    }
+  });
+
   // List workspace members
   app.get("/:workspaceId/members", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
-    const { workspaceId } = request.params as { workspaceId: string };
-    const members = await getWorkspaceMembers(workspaceId);
-    sendSuccess(reply, members);
+    try {
+      const { workspaceId } = request.params as { workspaceId: string };
+      const members = await getWorkspaceMembers(workspaceId);
+      sendSuccess(reply, members);
+    } catch (error) {
+      if (error instanceof AppError) {
+        sendError(reply, error.statusCode, error.code, error.message);
+        return;
+      }
+      throw error;
+    }
   });
 
   // Invite member
-  app.post("/:workspaceId/invitations", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
+  app.post("/:workspaceId/invitations", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
       const invitation = await inviteMember(workspaceId, request.user!.userId, request.body);
@@ -89,9 +121,17 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
 
   // List invitations
   app.get("/:workspaceId/invitations", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
-    const { workspaceId } = request.params as { workspaceId: string };
-    const invitations = await getWorkspaceInvitations(workspaceId);
-    sendSuccess(reply, invitations);
+    try {
+      const { workspaceId } = request.params as { workspaceId: string };
+      const invitations = await getWorkspaceInvitations(workspaceId);
+      sendSuccess(reply, invitations);
+    } catch (error) {
+      if (error instanceof AppError) {
+        sendError(reply, error.statusCode, error.code, error.message);
+        return;
+      }
+      throw error;
+    }
   });
 
   // Respond to invitation
@@ -110,7 +150,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   });
 
   // Remove member
-  app.delete("/:workspaceId/members/:memberId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
+  app.delete("/:workspaceId/members/:memberId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId, memberId } = request.params as { workspaceId: string; memberId: string };
       await removeMember(workspaceId, memberId, request.user!.userId);
@@ -125,7 +165,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   });
 
   // Change member role
-  app.patch("/:workspaceId/members/:memberId/role", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
+  app.patch("/:workspaceId/members/:memberId/role", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId, memberId } = request.params as { workspaceId: string; memberId: string };
       const { role } = request.body as { role: string };

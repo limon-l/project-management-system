@@ -17,7 +17,7 @@ export const createProjectSchema = z
 export const updateProjectSchema = z
   .object({
     name: nameSchema.optional(),
-    description: z.string().max(2000).optional().nullable(),
+    description: z.string().trim().max(2000).optional().nullable(),
     status: z.nativeEnum(PROJECT_STATUSES).optional(),
     startDate: z.coerce.date().optional().nullable(),
     targetDate: z.coerce.date().optional().nullable(),

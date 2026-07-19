@@ -15,6 +15,8 @@ import {
 } from "@/hooks/use-projects";
 import Link from "next/link";
 import { WorkspaceAnalytics } from "@/components/workspace-analytics";
+import { useMyTasks, type MyTask } from "@/hooks/use-my-tasks";
+import { useWorkspaceRealtime } from "@/hooks/use-realtime";
 
 const NAV_ITEMS = [
   {
@@ -22,6 +24,7 @@ const NAV_ITEMS = [
     href: "/dashboard",
     icon: (active: boolean) => (
       <svg
+        aria-hidden="true"
         className={`h-4 w-4 ${active ? "text-primary" : "text-muted-foreground"}`}
         viewBox="0 0 24 24"
         fill="none"
@@ -42,6 +45,7 @@ const NAV_ITEMS = [
     href: "/my-work",
     icon: (active: boolean) => (
       <svg
+        aria-hidden="true"
         className={`h-4 w-4 ${active ? "text-primary" : "text-muted-foreground"}`}
         viewBox="0 0 24 24"
         fill="none"
@@ -60,6 +64,7 @@ const NAV_ITEMS = [
     href: "/settings",
     icon: (active: boolean) => (
       <svg
+        aria-hidden="true"
         className={`h-4 w-4 ${active ? "text-primary" : "text-muted-foreground"}`}
         viewBox="0 0 24 24"
         fill="none"
@@ -149,6 +154,14 @@ export default function DashboardPage() {
     selectedWorkspace ?? ""
   );
   const createProject = useCreateProject(selectedWorkspace ?? "");
+  const { data: myTasks = [] } = useMyTasks();
+  useWorkspaceRealtime(selectedWorkspace ?? undefined);
+
+  const activeTasks = myTasks.filter((t: MyTask) => !t.completed);
+  const completedTasks = myTasks.filter((t: MyTask) => t.completed);
+  const overdueTasks = myTasks.filter(
+    (t: MyTask) => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()
+  );
 
   if (loading) return <LoadingSkeleton />;
 
@@ -295,6 +308,7 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={() => void logout()}
+              aria-label="Sign out"
               title="Sign out"
               className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
@@ -375,6 +389,90 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+
+          {/* My Tasks summary */}
+          {myTasks.length > 0 && (
+            <section className="mb-8 animate-slide-up">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold tracking-tight">My Tasks</h2>
+                <Link
+                  href="/my-work"
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  View all
+                </Link>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-border bg-surface p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="flex h-2 w-2 rounded-full bg-primary" />
+                    <span className="text-xs font-medium text-muted-foreground">In Progress</span>
+                  </div>
+                  <p className="text-2xl font-bold">{activeTasks.length}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-surface p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="flex h-2 w-2 rounded-full bg-success" />
+                    <span className="text-xs font-medium text-muted-foreground">Completed</span>
+                  </div>
+                  <p className="text-2xl font-bold">{completedTasks.length}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-surface p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="flex h-2 w-2 rounded-full bg-destructive" />
+                    <span className="text-xs font-medium text-muted-foreground">Overdue</span>
+                  </div>
+                  <p className={`text-2xl font-bold ${overdueTasks.length > 0 ? "text-destructive" : ""}`}>
+                    {overdueTasks.length}
+                  </p>
+                </div>
+              </div>
+              {activeTasks.length > 0 && (
+                <div className="mt-3 rounded-xl border border-border bg-surface divide-y divide-border">
+                  {activeTasks.slice(0, 5).map((task: MyTask) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center justify-between px-4 py-2.5"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-xs font-mono font-semibold text-muted-foreground shrink-0">
+                          {task.key}
+                        </span>
+                        <span className="text-sm truncate">{task.title}</span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 ml-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                            task.priority === "URGENT"
+                              ? "bg-destructive/10 text-destructive"
+                              : task.priority === "HIGH"
+                                ? "bg-orange-500/10 text-orange-600"
+                                : task.priority === "MEDIUM"
+                                  ? "bg-yellow-500/10 text-yellow-600"
+                                  : "bg-accent text-muted-foreground"
+                          }`}
+                        >
+                          {task.priority}
+                        </span>
+                        {task.dueDate && (
+                          <span className={`text-[11px] ${
+                            new Date(task.dueDate) < new Date()
+                              ? "text-destructive font-medium"
+                              : "text-muted-foreground"
+                          }`}>
+                            {new Date(task.dueDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Empty state: no workspace selected */}
           {!selectedWorkspace && !workspacesLoading && (
@@ -746,6 +844,8 @@ export default function DashboardPage() {
           onClick={() => setShowCreateWorkspace(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
             className="animate-scale-in w-full max-w-lg rounded-2xl border border-border bg-surface p-0 shadow-deep"
             onClick={(e) => e.stopPropagation()}
           >
@@ -756,10 +856,11 @@ export default function DashboardPage() {
               </p>
             </div>
             <form onSubmit={handleCreateWorkspace} className="px-6 py-5">
-              <label className="mb-1.5 block text-sm font-medium">
+              <label htmlFor="workspace-name" className="mb-1.5 block text-sm font-medium">
                 Workspace name
               </label>
               <input
+                id="workspace-name"
                 autoFocus
                 value={workspaceName}
                 onChange={(e) => setWorkspaceName(e.target.value)}
@@ -797,6 +898,8 @@ export default function DashboardPage() {
           onClick={() => setShowCreateProject(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
             className="animate-scale-in w-full max-w-lg rounded-2xl border border-border bg-surface p-0 shadow-deep"
             onClick={(e) => e.stopPropagation()}
           >
@@ -807,23 +910,25 @@ export default function DashboardPage() {
               </p>
             </div>
             <form onSubmit={handleCreateProject} className="px-6 py-5">
-              <label className="mb-1.5 block text-sm font-medium">
+              <label htmlFor="project-name" className="mb-1.5 block text-sm font-medium">
                 Project name
               </label>
               <input
+                id="project-name"
                 autoFocus
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="e.g. Website Redesign, Mobile App"
                 className="mb-4 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
               />
-              <label className="mb-1.5 block text-sm font-medium">
+              <label htmlFor="project-key" className="mb-1.5 block text-sm font-medium">
                 Project key
                 <span className="ml-1 font-normal text-muted-foreground">
                   &mdash; used in task IDs
                 </span>
               </label>
               <input
+                id="project-key"
                 value={projectKey}
                 onChange={(e) =>
                   setProjectKey(e.target.value.toUpperCase().slice(0, 10))

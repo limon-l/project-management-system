@@ -1,9 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { AppHeader } from "./app-header";
-import { CommandPalette } from "./command-palette";
+import { ShortcutsPanel } from "./shortcuts-panel";
+
+const CommandPalette = dynamic(
+  () => import("./command-palette").then((m) => ({ default: m.CommandPalette })),
+  { ssr: false }
+);
 
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/privacy", "/terms"];
 
@@ -12,14 +18,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isPublicPage = PUBLIC_ROUTES.some(
     (route) => route === pathname || pathname.startsWith(route + "/")
   );
+  // Project pages have their own layout (ProjectLayout) with a sidebar,
+  // so we hide the global AppHeader to avoid duplicate navigation chrome.
+  const isProjectPage = pathname.includes("/projects/");
 
   return (
     <>
-      {!isPublicPage && <AppHeader />}
+      {!isPublicPage && !isProjectPage && <AppHeader />}
       <main className={isPublicPage ? "min-h-screen" : "min-h-[calc(100vh-56px)]"}>
         {children}
       </main>
       <CommandPalette />
+      {!isPublicPage && <ShortcutsPanel />}
     </>
   );
 }

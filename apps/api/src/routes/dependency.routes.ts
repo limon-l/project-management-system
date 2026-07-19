@@ -13,16 +13,24 @@ export async function dependencyRoutes(app: FastifyInstance): Promise<void> {
     "/tasks/:taskId/dependencies",
     { preHandler: [authMiddleware, requireTaskAccess] },
     async (request, reply) => {
-      const { taskId } = request.params as { taskId: string };
-      const task = await import("../models/index.js").then((m) =>
-        m.Task.findById(taskId).select("projectId").lean()
-      );
-      if (!task) {
-        sendError(reply, 404, "NOT_FOUND", "Task not found");
-        return;
+      try {
+        const { taskId } = request.params as { taskId: string };
+        const task = await import("../models/index.js").then((m) =>
+          m.Task.findById(taskId).select("projectId").lean()
+        );
+        if (!task) {
+          sendError(reply, 404, "NOT_FOUND", "Task not found");
+          return;
+        }
+        const result = await getTaskDependencies(taskId, task.projectId.toString());
+        sendSuccess(reply, result);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
       }
-      const result = await getTaskDependencies(taskId, task.projectId.toString());
-      sendSuccess(reply, result);
     }
   );
 

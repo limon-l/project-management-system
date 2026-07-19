@@ -38,6 +38,7 @@ export default function MyWorkPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [groupBy, setGroupBy] = useState<"dueDate" | "priority" | "project">(
     "dueDate",
   );
@@ -72,7 +73,7 @@ export default function MyWorkPage() {
         }
         if (summaryJson.success) setSummary(summaryJson.data);
       } catch {
-        // silent
+        setError("Failed to load tasks. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -83,6 +84,12 @@ export default function MyWorkPage() {
   if (authLoading || loading) {
     return (
       <div className="p-10 text-center text-muted-foreground">Loading...</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-10 text-center text-destructive">{error}</div>
     );
   }
 
@@ -180,7 +187,7 @@ export default function MyWorkPage() {
 
       {groupOrder.map((key) => {
         const section = groups[key];
-        if (section.length === 0) return null;
+        if (!section || section.length === 0) return null;
         return (
           <div key={key} className="mb-8">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

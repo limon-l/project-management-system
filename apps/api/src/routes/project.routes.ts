@@ -48,9 +48,17 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     "/workspaces/:workspaceId/projects",
     { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] },
     async (request, reply) => {
-      const { workspaceId } = request.params as { workspaceId: string };
-      const projects = await getWorkspaceProjects(workspaceId);
-      sendSuccess(reply, projects);
+      try {
+        const { workspaceId } = request.params as { workspaceId: string };
+        const projects = await getWorkspaceProjects(workspaceId);
+        sendSuccess(reply, projects);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
     }
   );
 
@@ -76,7 +84,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Update project
   app.patch(
     "/projects/:projectId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -95,7 +103,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Archive project
   app.post(
     "/projects/:projectId/archive",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -114,7 +122,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Delete project
   app.delete(
     "/projects/:projectId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -174,16 +182,24 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     "/projects/:projectId/members",
     { preHandler: [authMiddleware, authorize({ requireProject: true })] },
     async (request, reply) => {
-      const { projectId } = request.params as { projectId: string };
-      const members = await getProjectMembers(projectId);
-      sendSuccess(reply, members);
+      try {
+        const { projectId } = request.params as { projectId: string };
+        const members = await getProjectMembers(projectId);
+        sendSuccess(reply, members);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
     }
   );
 
   // Add project member
   app.post(
     "/projects/:projectId/members",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -202,7 +218,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Remove project member
   app.delete(
     "/projects/:projectId/members/:memberId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { projectId, memberId } = request.params as {
@@ -226,16 +242,24 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     "/projects/:projectId/labels",
     { preHandler: [authMiddleware, authorize({ requireProject: true })] },
     async (request, reply) => {
-      const { projectId } = request.params as { projectId: string };
-      const labels = await getTaskLabels(projectId);
-      sendSuccess(reply, labels);
+      try {
+        const { projectId } = request.params as { projectId: string };
+        const labels = await getTaskLabels(projectId);
+        sendSuccess(reply, labels);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
     }
   );
 
   // Create label
   app.post(
     "/projects/:projectId/labels",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -255,7 +279,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Delete label
   app.delete(
     "/projects/:projectId/labels/:labelId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
     async (request, reply) => {
       try {
         const { labelId } = request.params as { labelId: string };
@@ -276,8 +300,16 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     "/tasks/my",
     { preHandler: [authMiddleware] },
     async (request, reply) => {
-      const tasks = await getUserAssignedTasks(request.user!.userId);
-      sendSuccess(reply, tasks);
+      try {
+        const tasks = await getUserAssignedTasks(request.user!.userId);
+        sendSuccess(reply, tasks);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
     }
   );
 }

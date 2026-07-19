@@ -297,7 +297,7 @@ All endpoints are prefixed with `/api`.
 | `GET` | `/workspaces` | List user's workspaces |
 | `POST` | `/workspaces` | Create workspace |
 | `GET` | `/workspaces/:id` | Get workspace |
-| `PUT` | `/workspaces/:id` | Update workspace |
+| `PATCH` | `/workspaces/:id` | Update workspace |
 | `DELETE` | `/workspaces/:id` | Delete workspace |
 | `POST` | `/workspaces/:id/invite` | Invite member |
 | `PUT` | `/workspaces/:id/members/:userId` | Update member role |

@@ -18,17 +18,8 @@ const nextConfig = {
 
   poweredByHeader: false,
 
-  async rewrites() {
-    const apiTarget = process.env.API_PROXY_TARGET ?? process.env.NEXT_PUBLIC_API_URL;
-
-    if (!apiTarget) return [];
-
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${apiTarget.replace(/\/$/, "")}/api/:path*`,
-      },
-    ];
+  experimental: {
+    optimizePackageImports: ["@tanstack/react-query", "zustand", "lucide-react"],
   },
 
   async headers() {
@@ -40,12 +31,19 @@ const nextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-XSS-Protection", value: "0" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
       {
         source: "/favicon.svg",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/api/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "no-store" },
         ],
       },
     ];

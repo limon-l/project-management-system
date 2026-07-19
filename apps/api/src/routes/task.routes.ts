@@ -21,10 +21,18 @@ export async function taskRoutes(app: FastifyInstance): Promise<void> {
     "/projects/:projectId/tasks",
     { preHandler: [authMiddleware, authorize({ requireProject: true })] },
     async (request, reply) => {
-      const { projectId } = request.params as { projectId: string };
-      const { columnId } = request.query as { columnId?: string };
-      const tasks = await getProjectTasks(projectId, columnId);
-      sendSuccess(reply, tasks);
+      try {
+        const { projectId } = request.params as { projectId: string };
+        const { columnId } = request.query as { columnId?: string };
+        const tasks = await getProjectTasks(projectId, columnId);
+        sendSuccess(reply, tasks);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
     }
   );
 
@@ -128,9 +136,17 @@ export async function taskRoutes(app: FastifyInstance): Promise<void> {
     "/tasks/:taskId/checklist",
     { preHandler: [authMiddleware, requireTaskAccess] },
     async (request, reply) => {
-      const { taskId } = request.params as { taskId: string };
-      const items = await getTaskChecklist(taskId);
-      sendSuccess(reply, items);
+      try {
+        const { taskId } = request.params as { taskId: string };
+        const items = await getTaskChecklist(taskId);
+        sendSuccess(reply, items);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
     }
   );
 

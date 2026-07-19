@@ -39,7 +39,7 @@ export function useRealtime(projectId?: string) {
     }
 
     function invalidateMembers() {
-      void queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["projectMembers", projectId] });
     }
 
     socket.on("task:created", () => { invalidateTasks(); });

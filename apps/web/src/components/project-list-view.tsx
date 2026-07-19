@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/use-auth";
+import { useRealtime } from "@/hooks/use-realtime";
 import {
   useProjectTasks,
   useProjectColumns,
@@ -10,9 +12,13 @@ import {
   useDeleteTask,
   type Task,
 } from "@/hooks/use-tasks";
-import { TaskDetailDrawer } from "@/components/task-detail-drawer";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { cn } from "@/lib/utils";
+
+const TaskDetailDrawer = dynamic(
+  () => import("@/components/task-detail-drawer").then((m) => ({ default: m.TaskDetailDrawer })),
+  { ssr: false }
+);
 
 type SortField = "key" | "title" | "priority" | "dueDate" | "assignee";
 type SortDirection = "asc" | "desc";
@@ -44,11 +50,13 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
   const createTask = useCreateTask(projectId);
   const _moveTask = useMoveTask(projectId);
   const deleteTask = useDeleteTask(projectId);
+  useRealtime(projectId);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>("key");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const columnMap = new Map<string, string>(columns.map((c) => [c.id, c.name]));
 
@@ -90,6 +98,38 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
     );
   };
 
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedIds.size === sortedTasks.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(sortedTasks.map((t) => t.id)));
+    }
+  }, [selectedIds.size, sortedTasks]);
+
+  const bulkDelete = useCallback(() => {
+    if (!confirm(`Delete ${selectedIds.size} task(s)?`)) return;
+    for (const id of selectedIds) {
+      deleteTask.mutate(id);
+    }
+    setSelectedIds(new Set());
+  }, [selectedIds, deleteTask]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
   if (tasksLoading || columnsLoading || !user) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -97,6 +137,9 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
       </div>
     );
   }
+
+  const allSelected = sortedTasks.length > 0 && selectedIds.size === sortedTasks.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < sortedTasks.length;
 
   return (
     <div className="flex h-full flex-col">
@@ -124,10 +167,45 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
         </button>
       </div>
 
+      {/* Bulk action toolbar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 border-b border-primary/20 bg-primary/5 px-6 py-2">
+          <span className="text-sm font-medium text-primary">
+            {selectedIds.size} task(s) selected
+          </span>
+          <button
+            onClick={bulkDelete}
+            className="inline-flex items-center gap-1 rounded-md bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/20"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            Delete
+          </button>
+          <button
+            onClick={clearSelection}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Clear selection
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-auto">
         <table className="w-full">
           <thead className="sticky top-0 bg-muted/80 backdrop-blur-sm">
             <tr className="border-b border-border">
+              <th className="w-10 px-4 py-2">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                  onChange={toggleSelectAll}
+                  aria-label="Select all tasks"
+                  className="h-4 w-4 rounded border-border accent-primary"
+                />
+              </th>
               <th
                 className="cursor-pointer px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
                 onClick={() => { handleSort("key"); }}
@@ -169,7 +247,7 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
           <tbody className="divide-y divide-border">
             {sortedTasks.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
                   No tasks yet. Create one to get started.
                 </td>
               </tr>
@@ -180,9 +258,21 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                 return (
                   <tr
                     key={task.id}
-                    className="group cursor-pointer transition-colors hover:bg-accent/50"
+                    className={cn(
+                      "group cursor-pointer transition-colors hover:bg-accent/50",
+                      selectedIds.has(task.id) && "bg-primary/5"
+                    )}
                     onClick={() => { setSelectedTask(task); }}
                   >
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(task.id)}
+                        onChange={() => { toggleSelect(task.id); }}
+                        aria-label={`Select task ${task.key}`}
+                        className="h-4 w-4 rounded border-border accent-primary"
+                      />
+                    </td>
                     <td className="px-4 py-3">
                       <span className="font-mono text-xs text-muted-foreground">{task.key}</span>
                     </td>

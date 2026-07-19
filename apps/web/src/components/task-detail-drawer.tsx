@@ -91,7 +91,12 @@ export function TaskDetailDrawer({
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-border bg-surface shadow-xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="task-drawer-title"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-border bg-surface shadow-xl"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="flex items-center gap-3">
@@ -101,6 +106,7 @@ export function TaskDetailDrawer({
             {editingTitle ? (
               <input
                 autoFocus
+                aria-label="Task title"
                 value={titleValue}
                 onChange={(e) => { setTitleValue(e.target.value); }}
                 onBlur={handleTitleSave}
@@ -115,7 +121,16 @@ export function TaskDetailDrawer({
               />
             ) : (
               <h2
+                id="task-drawer-title"
+                role="button"
+                tabIndex={0}
                 onClick={() => { setEditingTitle(true); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setEditingTitle(true);
+                  }
+                }}
                 className="cursor-pointer text-lg font-semibold hover:text-primary"
               >
                 {task.title}
@@ -124,9 +139,11 @@ export function TaskDetailDrawer({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close task details"
             className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <svg
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               width="18"
               height="18"
@@ -353,6 +370,7 @@ export function TaskDetailDrawer({
                   value={addingDependencyKey}
                   onChange={(e) => { setAddingDependencyKey(e.target.value); }}
                   placeholder="Add blocker by task key..."
+                  aria-label="Add blocker task key"
                   className="h-7 flex-1 rounded border border-border px-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 <button
@@ -424,6 +442,7 @@ export function TaskDetailDrawer({
                   value={newChecklistItem}
                   onChange={(e) => { setNewChecklistItem(e.target.value); }}
                   placeholder="Add an item..."
+                  aria-label="Add checklist item"
                   className="h-7 flex-1 rounded border border-border px-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 <button

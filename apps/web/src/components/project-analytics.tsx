@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { API_URL as API } from "@/lib/utils";
 
-
 interface ProjectAnalytics {
   totalTasks: number;
   completedTasks: number;
@@ -17,6 +16,7 @@ interface ProjectAnalytics {
 export function ProjectAnalytics({ projectId }: { projectId: string }) {
   const [data, setData] = useState<ProjectAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -27,7 +27,7 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
         const json = await res.json() as { success: boolean; data: ProjectAnalytics };
         if (json.success) setData(json.data);
       } catch {
-        // silent
+        setError("Failed to load analytics");
       } finally {
         setLoading(false);
       }
@@ -36,64 +36,94 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
   }, [projectId]);
 
   if (loading) {
-    return <div style={{ padding: "16px", color: "#9ca3af", fontSize: "14px" }}>Loading analytics...</div>;
+    return <div className="p-4 text-xs text-muted-foreground">Loading analytics...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-xs text-destructive">{error}</div>;
   }
 
   if (!data) return null;
 
-  const priorityColors: Record<string, string> = {
-    URGENT: "#ef4444",
-    HIGH: "#f97316",
-    MEDIUM: "#eab308",
-    LOW: "#3b82f6",
-    NO_PRIORITY: "#9ca3af",
+  const priorityColorMap: Record<string, string> = {
+    URGENT: "bg-destructive",
+    HIGH: "bg-orange-500",
+    MEDIUM: "bg-yellow-500",
+    LOW: "bg-blue-500",
+    NO_PRIORITY: "bg-muted-foreground",
   };
 
   const maxPriorityCount = Math.max(...Object.values(data.tasksByPriority), 1);
 
+  const completionColor =
+    data.completionPercentage >= 80
+      ? "text-success"
+      : data.completionPercentage >= 50
+        ? "text-warning"
+        : "text-destructive";
+
+  const completionBarColor =
+    data.completionPercentage >= 80
+      ? "bg-success"
+      : data.completionPercentage >= 50
+        ? "bg-warning"
+        : "bg-destructive";
+
   return (
     <div>
-      <h3 style={{ fontSize: "14px", fontWeight: 600, margin: "0 0 16px" }}>Project Analytics</h3>
+      <h3 className="mb-4 text-sm font-semibold">Project Analytics</h3>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }}>
+      <div className="mb-6 grid grid-cols-4 gap-3">
         {[
-          { label: "Total Tasks", value: String(data.totalTasks), color: "#374151" },
-          { label: "Completed", value: String(data.completedTasks), color: "#10b981" },
-          { label: "Completion", value: `${String(data.completionPercentage)}%`, color: data.completionPercentage >= 80 ? "#10b981" : data.completionPercentage >= 50 ? "#f59e0b" : "#ef4444" },
-          { label: "Overdue", value: String(data.overdueTasks), color: data.overdueTasks > 0 ? "#ef4444" : "#9ca3af" },
+          { label: "Total Tasks", value: data.totalTasks, colorClass: "text-foreground" },
+          { label: "Completed", value: data.completedTasks, colorClass: "text-success" },
+          { label: "Completion", value: `${data.completionPercentage}%`, colorClass: completionColor },
+          {
+            label: "Overdue",
+            value: data.overdueTasks,
+            colorClass: data.overdueTasks > 0 ? "text-destructive" : "text-muted-foreground",
+          },
         ].map((s) => (
-          <div key={s.label} style={{ padding: "14px", borderRadius: "8px", border: "1px solid #e5e7eb", textAlign: "center" }}>
-            <div style={{ fontSize: "24px", fontWeight: 700, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>{s.label}</div>
+          <div key={s.label} className="rounded-lg border border-border p-3 text-center">
+            <div className={`text-2xl font-bold ${s.colorClass}`}>{s.value}</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Completion bar */}
-      <div style={{ marginBottom: "20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280", marginBottom: "6px" }}>
+      <div className="mb-5">
+        <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">
           <span>Progress</span>
-          <span>{`${String(data.completionPercentage)}%`}</span>
+          <span>{data.completionPercentage}%</span>
         </div>
-        <div style={{ height: "8px", borderRadius: "4px", background: "#e5e7eb", overflow: "hidden" }}>
-          <div style={{ height: "100%", borderRadius: "4px", background: data.completionPercentage >= 80 ? "#10b981" : data.completionPercentage >= 50 ? "#f59e0b" : "#ef4444", width: `${String(data.completionPercentage)}%`, transition: "width 0.5s" }} />
+        <div className="h-2 overflow-hidden rounded-full bg-border">
+          <div
+            className={`h-full rounded-full transition-all ${completionBarColor}`}
+            style={{ width: `${data.completionPercentage}%` }}
+          />
         </div>
       </div>
 
       {/* Tasks by priority */}
       {Object.keys(data.tasksByPriority).length > 0 && (
-        <div style={{ marginBottom: "20px" }}>
-          <h4 style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", margin: "0 0 8px", textTransform: "uppercase" }}>
+        <div className="mb-5">
+          <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Tasks by Priority (incomplete)
           </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div className="flex flex-col gap-1.5">
             {Object.entries(data.tasksByPriority).map(([priority, count]) => (
-              <div key={priority} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ width: "80px", fontSize: "12px", color: "#374151" }}>{priority}</span>
-                <div style={{ flex: 1, height: "6px", borderRadius: "3px", background: "#e5e7eb", overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: "3px", background: priorityColors[priority] ?? "#9ca3af", width: `${String((count / maxPriorityCount) * 100)}%` }} />
+              <div key={priority} className="flex items-center gap-2">
+                <span className="w-20 text-xs text-foreground">{priority}</span>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
+                  <div
+                    className={`h-full rounded-full ${priorityColorMap[priority] ?? "bg-muted-foreground"}`}
+                    style={{ width: `${(count / maxPriorityCount) * 100}%` }}
+                  />
                 </div>
-                <span style={{ width: "24px", textAlign: "right", fontSize: "12px", color: "#6b7280", fontWeight: 600 }}>{String(count)}</span>
+                <span className="w-6 text-right text-xs font-semibold text-muted-foreground">
+                  {count}
+                </span>
               </div>
             ))}
           </div>
@@ -103,14 +133,17 @@ export function ProjectAnalytics({ projectId }: { projectId: string }) {
       {/* Top assignees */}
       {data.tasksByAssignee.length > 0 && (
         <div>
-          <h4 style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", margin: "0 0 8px", textTransform: "uppercase" }}>
+          <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Top Assignees
           </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <div className="flex flex-col gap-1">
             {data.tasksByAssignee.slice(0, 5).map((a) => (
-              <div key={a.userId} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #f3f4f6", fontSize: "13px" }}>
+              <div
+                key={a.userId}
+                className="flex justify-between border-b border-accent py-1.5 text-[13px]"
+              >
                 <span>{a.name}</span>
-                <span style={{ color: "#6b7280", fontWeight: 600 }}>{`${String(a.taskCount)} tasks`}</span>
+                <span className="font-semibold text-muted-foreground">{a.taskCount} tasks</span>
               </div>
             ))}
           </div>

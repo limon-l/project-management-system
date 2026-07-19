@@ -88,12 +88,21 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     "/logout",
     { preHandler: [authMiddleware] },
     async (request, reply) => {
-      const sessionToken = request.cookies?.session;
-      if (sessionToken) {
-        await logout(sessionToken);
+      try {
+        const sessionToken = request.cookies?.session;
+        if (sessionToken) {
+          await logout(sessionToken);
+        }
+        reply.clearCookie("session", getClearCookieOptions());
+        sendSuccess(reply, { message: "Logged out" });
+      } catch (error) {
+        reply.clearCookie("session", getClearCookieOptions());
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        sendSuccess(reply, { message: "Logged out" });
       }
-      reply.clearCookie("session", getClearCookieOptions());
-      sendSuccess(reply, { message: "Logged out" });
     }
   );
 

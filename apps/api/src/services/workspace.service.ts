@@ -1,4 +1,4 @@
-import { Workspace, WorkspaceMember, Invitation, User } from "../models/index.js";
+import { Workspace, WorkspaceMember, Invitation, User, Project, Board, Column, Task } from "../models/index.js";
 import { AppError, validate, slugify } from "../utils/helpers.js";
 import {
   createWorkspaceSchema,
@@ -313,6 +313,54 @@ export async function changeMemberRole(
     resourceId: memberId,
     details: { workspaceId, newRole, previousRole: member.role },
   });
+}
+
+export async function deleteWorkspace(
+  workspaceId: string,
+  userId: string
+) {
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    throw new AppError(404, "NOT_FOUND", "Workspace not found");
+  }
+
+  if (workspace.ownerId.toString() !== userId) {
+    throw new AppError(403, "FORBIDDEN", "Only the workspace owner can delete it");
+  }
+
+  const projects = await Project.find({ workspaceId }).select("_id").lean();
+  const projectIds = projects.map((p) => p._id);
+
+  if (projectIds.length > 0) {
+    const boards = await Board.find({ projectId: { $in: projectIds } }).select("_id").lean();
+    const boardIds = boards.map((b) => b._id);
+
+    if (boardIds.length > 0) {
+      const columns = await Column.find({ boardId: { $in: boardIds } }).select("_id").lean();
+      const columnIds = columns.map((c) => c._id);
+
+      if (columnIds.length > 0) {
+        await Task.deleteMany({ columnId: { $in: columnIds } });
+      }
+      await Column.deleteMany({ boardId: { $in: boardIds } });
+    }
+    await Board.deleteMany({ projectId: { $in: projectIds } });
+    await Project.deleteMany({ workspaceId });
+  }
+
+  await Invitation.deleteMany({ workspaceId });
+  await WorkspaceMember.deleteMany({ workspaceId });
+  await Workspace.findByIdAndDelete(workspaceId);
+
+  logAudit({
+    action: "workspace:deleted",
+    actorId: userId,
+    resourceType: "workspace",
+    resourceId: workspaceId,
+    details: { workspaceName: workspace.name },
+  });
+
+  return { message: "Workspace deleted" };
 }
 
 export async function getWorkspaceInvitations(workspaceId: string) {

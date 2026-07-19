@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
-import { useProjects } from "@/hooks/use-projects";
-import { useProjectTasks } from "@/hooks/use-tasks";
+import { apiArray } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import type { Project } from "@/hooks/use-projects";
 
 type CommandGroup = "tasks" | "projects" | "workspaces" | "actions";
 
@@ -18,6 +19,20 @@ interface CommandItem {
   action: () => void;
 }
 
+interface SearchProject {
+  id: string;
+  workspaceId: string;
+  name: string;
+  key: string;
+}
+
+interface SearchTask {
+  id: string;
+  projectId: string;
+  key: string;
+  title: string;
+}
+
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -25,8 +40,41 @@ export function CommandPalette() {
   const { user: _user } = useAuth();
   const router = useRouter();
   const { data: workspaces = [] } = useWorkspaces();
-  const { data: projects = [] } = useProjects(workspaces[0]?.id ?? "");
-  const { data: tasks = [] } = useProjectTasks(projects[0]?.id ?? "");
+
+  const { data: allProjects = [] } = useQuery({
+    queryKey: ["commandPaletteProjects", workspaces.map((w) => w.id).sort().join(",")],
+    queryFn: async () => {
+      const results: SearchProject[] = [];
+      await Promise.all(
+        workspaces.map(async (ws) => {
+          try {
+            const projects = await apiArray<Project>(`/api/workspaces/${ws.id}/projects`);
+            for (const p of projects) {
+              results.push({ id: p.id, workspaceId: ws.id, name: p.name, key: p.key });
+            }
+          } catch {
+            // Skip failed workspace
+          }
+        })
+      );
+      return results;
+    },
+    enabled: open && workspaces.length > 0,
+  });
+
+  const firstProjectId = allProjects[0]?.id;
+  const { data: allTasks = [] } = useQuery({
+    queryKey: ["commandPaletteTasks", firstProjectId],
+    queryFn: async () => {
+      if (!firstProjectId) return [];
+      try {
+        return await apiArray<SearchTask>(`/api/projects/${firstProjectId}/tasks`);
+      } catch {
+        return [];
+      }
+    },
+    enabled: open && !!firstProjectId,
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,7 +107,7 @@ export function CommandPalette() {
   }, [open]);
 
   const items: CommandItem[] = [
-    ...tasks
+    ...allTasks
       .filter((t) => {
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- boolean OR, not value coalescing
         return t.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -67,7 +115,7 @@ export function CommandPalette() {
       })
       .slice(0, 5)
       .map((task) => {
-        const project = projects.find((p) => p.id === task.projectId);
+        const project = allProjects.find((p) => p.id === task.projectId);
         const workspaceId = project?.workspaceId ?? "";
         return {
           id: `task-${task.id}`,
@@ -82,9 +130,9 @@ export function CommandPalette() {
           },
         };
       }),
-    ...projects
+    ...allProjects
       .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
-      .slice(0, 3)
+      .slice(0, 5)
       .map((project) => ({
         id: `project-${project.id}`,
         label: project.name,
@@ -104,7 +152,7 @@ export function CommandPalette() {
         group: "workspaces" as CommandGroup,
         action: () => {
           setOpen(false);
-          router.push(`/workspaces/${workspace.id}`);
+          router.push(`/dashboard`);
         },
       })),
     {
@@ -164,11 +212,12 @@ export function CommandPalette() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]" role="dialog" aria-modal="true">
       <div className="fixed inset-0 bg-black/50" onClick={() => { setOpen(false); }} />
       <div className="relative w-full max-w-xl rounded-xl border border-border bg-surface shadow-2xl">
         <div className="flex items-center border-b border-border px-4">
           <svg
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
@@ -189,6 +238,7 @@ export function CommandPalette() {
             onChange={(e) => { setQuery(e.target.value); }}
             onKeyDown={handleKeyDown}
             placeholder="Type a command or search..."
+            aria-label="Command palette search"
             className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           <kbd className="rounded border border-border px-1.5 py-0.5 text-xs text-muted-foreground">

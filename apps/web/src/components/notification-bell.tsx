@@ -37,6 +37,7 @@ export function NotificationBell() {
         className="relative cursor-pointer border-none bg-transparent p-2 text-foreground"
       >
         <svg
+          aria-hidden="true"
           width="20"
           height="20"
           viewBox="0 0 24 24"
@@ -82,8 +83,16 @@ export function NotificationBell() {
             notifications.map((n) => (
               <div
                 key={n.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   if (!n.read) markRead([n.id]);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (!n.read) markRead([n.id]);
+                  }
                 }}
                 className={`flex cursor-pointer gap-3 border-b border-accent px-4 py-3 transition-colors ${
                   n.read ? "bg-transparent" : "bg-primary/5"

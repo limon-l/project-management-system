@@ -5,9 +5,9 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-// Keep browser requests same-origin. Next.js proxies /api to the backend,
-// allowing the httpOnly session cookie to work even when the API is hosted on
-// a different provider/domain.
+// Same-origin: the Next.js catch-all API proxy at /api/[...path] forwards
+// requests to the backend while keeping the session cookie on the frontend
+// domain, so httpOnly cookies work correctly across page reloads.
 export const API_URL = "";
 
 export class ApiError extends Error {
@@ -33,14 +33,18 @@ export async function api<T = unknown>(
 ): Promise<T> {
   const { method = "GET", body, headers = {} } = options;
 
+  const isGet = method === "GET";
+  const requestHeaders: Record<string, string> = { ...headers };
+
+  if (!isGet && body !== undefined) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
+    headers: requestHeaders,
     credentials: "include",
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   if (!res.ok) {

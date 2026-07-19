@@ -12,7 +12,7 @@ export const createWorkspaceSchema = z
 export const updateWorkspaceSchema = z
   .object({
     name: nameSchema.optional(),
-    description: z.string().max(500).optional().nullable(),
+    description: z.string().trim().max(500).optional().nullable(),
   })
   .strict();
 

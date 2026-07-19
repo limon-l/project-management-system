@@ -60,7 +60,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground">{workspace.role}</p>
                 </div>
                 <Link
-                  href={`/dashboard?workspace=${workspace.id}`}
+                  href="/dashboard"
                   className="text-sm font-medium text-primary hover:text-primary/80"
                 >
                   Open

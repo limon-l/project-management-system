@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useProject } from "@/hooks/use-projects";
+import { useRealtime } from "@/hooks/use-realtime";
 import {
   useProjectTasks,
   useProjectColumns,
@@ -11,10 +13,14 @@ import {
   useCreateTask,
 } from "@/hooks/use-tasks";
 import { Board } from "@/components/board";
-import { TaskDetailDrawer } from "@/components/task-detail-drawer";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { ProjectLayout } from "@/components/project-layout";
 import { Task } from "@/hooks/use-tasks";
+
+const TaskDetailDrawer = dynamic(
+  () => import("@/components/task-detail-drawer").then((m) => ({ default: m.TaskDetailDrawer })),
+  { ssr: false }
+);
 
 interface BoardPageProps {
   projectId: string;
@@ -31,6 +37,7 @@ export function BoardPage({ projectId, workspaceId }: BoardPageProps) {
   const { data: project } = useProject(workspaceId, projectId);
   const moveTask = useMoveTask(projectId);
   const createTask = useCreateTask(projectId);
+  useRealtime(projectId);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null);

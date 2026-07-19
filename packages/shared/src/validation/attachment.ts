@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const createLabelSchema = z.object({
-  name: z.string().min(1).max(50),
+  name: z.string().trim().min(1).max(50),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a hex color"),
 }).strict();
 
 export const updateLabelSchema = z.object({
-  name: z.string().min(1).max(50).optional(),
+  name: z.string().trim().min(1).max(50).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
 }).strict();
 
