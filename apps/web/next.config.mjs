@@ -19,7 +19,7 @@ const nextConfig = {
   poweredByHeader: false,
 
   experimental: {
-    optimizePackageImports: ["@tanstack/react-query", "zustand", "lucide-react"],
+    optimizePackageImports: ["@tanstack/react-query", "zustand", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
   },
 
   async headers() {

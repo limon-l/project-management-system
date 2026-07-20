@@ -28,7 +28,6 @@ const checklistItemSchema = new Schema<IChecklistItem>(
 );
 
 checklistItemSchema.index({ taskId: 1, position: 1 });
-checklistItemSchema.index({ taskId: 1 });
 
 export const ChecklistItem = mongoose.model<IChecklistItem>(
   "ChecklistItem",

@@ -4,7 +4,7 @@ import {
   ProjectMember,
   type WorkspaceRole,
 } from "../models/index.js";
-import { sendError } from "../utils/helpers.js";
+import { sendError, isValidObjectId } from "../utils/helpers.js";
 import { ROLE_HIERARCHY, ERROR_CODES } from "@boardflow/shared";
 
 type RoleName = WorkspaceRole | string;
@@ -35,6 +35,11 @@ export function authorize(options: AuthorizationOptions) {
 
       if (!workspaceId) {
         sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Workspace ID required");
+        return;
+      }
+
+      if (!isValidObjectId(workspaceId)) {
+        sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Invalid workspace ID");
         return;
       }
 
@@ -70,6 +75,11 @@ export function authorize(options: AuthorizationOptions) {
 
       if (!projectId) {
         sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Project ID required");
+        return;
+      }
+
+      if (!isValidObjectId(projectId)) {
+        sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Invalid project ID");
         return;
       }
 

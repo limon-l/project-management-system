@@ -29,7 +29,6 @@ const taskDependencySchema = new Schema<ITaskDependency>(
 );
 
 taskDependencySchema.index({ projectId: 1, blockedTaskId: 1 });
-taskDependencySchema.index({ projectId: 1, blockingTaskId: 1 });
 taskDependencySchema.index({ projectId: 1, blockingTaskId: 1, blockedTaskId: 1 }, { unique: true });
 
 export const TaskDependency = mongoose.model<ITaskDependency>(

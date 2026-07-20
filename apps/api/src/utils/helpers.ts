@@ -1,6 +1,7 @@
 import type { FastifyReply } from "fastify";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { ZodError, type ZodSchema } from "zod";
+import { Types } from "mongoose";
 import { ERROR_CODES, type ApiResponse } from "@boardflow/shared";
 
 export class AppError extends Error {
@@ -13,6 +14,24 @@ export class AppError extends Error {
     super(message);
     this.name = "AppError";
   }
+}
+
+/** Validates that a value is a valid MongoDB ObjectId string. */
+export function isValidObjectId(value: unknown): value is string {
+  return typeof value === "string" && Types.ObjectId.isValid(value) && value.length === 24;
+}
+
+/** Validates multiple route params, returning a 400 if any are invalid. */
+export function validateObjectIdParam(
+  reply: FastifyReply,
+  paramName: string,
+  value: unknown
+): value is string {
+  if (!isValidObjectId(value)) {
+    sendError(reply, 400, ERROR_CODES.BAD_REQUEST, `Invalid ${paramName}`);
+    return false;
+  }
+  return true;
 }
 
 export function sendSuccess(
@@ -78,6 +97,27 @@ export function validate<T>(schema: ZodSchema<T>, data: unknown): T {
     }
     throw error;
   }
+}
+
+/**
+ * Converts a Mongoose lean document's `_id` (ObjectId) to an `id` (string)
+ * field so the frontend can use it directly. Non-ObjectId `_id` values are
+ * cast via `.toString()`. The original `_id` field is preserved for backward
+ * compatibility.
+ */
+export function toId<T extends Record<string, unknown>>(
+  doc: T
+): T & { id: string } {
+  const raw = doc as unknown as { _id: { toString(): string } };
+  if (!raw._id) return doc as T & { id: string };
+  return { ...doc, id: raw._id.toString() };
+}
+
+/** Batch-convert an array of lean documents. */
+export function toIdArray<T extends Record<string, unknown>>(
+  docs: T[]
+): (T & { id: string })[] {
+  return docs.map(toId);
 }
 
 export function slugify(text: string): string {

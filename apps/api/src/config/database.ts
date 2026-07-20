@@ -2,6 +2,30 @@ import mongoose from "mongoose";
 import { getEnv } from "./env.js";
 import { logger } from "../utils/logger.js";
 
+/**
+ * Global plugin that adds a consistent `toJSON` transform to every schema.
+ * Converts `_id` → `id` (string) and removes `__v` so API responses never
+ * leak internal MongoDB fields. Lean queries still need manual mapping via
+ * the `toId()` / `toIdArray()` helpers.
+ */
+function toJSONPlugin(schema: mongoose.Schema): void {
+  schema.set("toJSON", {
+    virtuals: true,
+    versionKey: false,
+    transform(_doc: unknown, ret: Record<string, unknown>) {
+      const raw = ret as { _id?: { toString(): string }; __v?: unknown };
+      if (raw._id) {
+        ret.id = raw._id.toString();
+        delete raw._id;
+      }
+      delete raw.__v;
+      return ret;
+    },
+  });
+}
+
+mongoose.plugin(toJSONPlugin);
+
 // Configure connection event listeners once at module import
 mongoose.connection.on("error", (err) => {
   logger.error({ err }, "MongoDB connection error");

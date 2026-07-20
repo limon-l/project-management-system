@@ -39,7 +39,6 @@ const projectSchema = new Schema<IProject>(
 );
 
 projectSchema.index({ workspaceId: 1, slug: 1 }, { unique: true });
-projectSchema.index({ workspaceId: 1 });
 projectSchema.index({ workspaceId: 1, key: 1 }, { unique: true });
 projectSchema.index({ name: "text", description: "text" });
 

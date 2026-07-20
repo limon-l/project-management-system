@@ -1,5 +1,5 @@
 import { Task, ChecklistItem, Label, Column, Project, Activity, Comment, Attachment, TaskDependency, Notification } from "../models/index.js";
-import { AppError, validate } from "../utils/helpers.js";
+import { AppError, validate, toId, toIdArray } from "../utils/helpers.js";
 import {
   createTaskSchema,
   updateTaskSchema,
@@ -20,7 +20,7 @@ export async function getProjectTasks(projectId: string, columnId?: string) {
     .sort({ position: 1 })
     .lean();
 
-  return tasks;
+  return toIdArray(tasks);
 }
 
 export async function getTaskById(taskId: string) {
@@ -33,7 +33,7 @@ export async function getTaskById(taskId: string) {
   if (!task) {
     throw new AppError(404, "NOT_FOUND", "Task not found");
   }
-  return task;
+  return toId(task);
 }
 
 export async function createTask(
@@ -187,7 +187,7 @@ export async function deleteTask(taskId: string) {
 }
 
 export async function getTaskChecklist(taskId: string) {
-  return ChecklistItem.find({ taskId }).sort({ position: 1 }).lean();
+  return toIdArray(await ChecklistItem.find({ taskId }).sort({ position: 1 }).lean());
 }
 
 export async function addChecklistItem(
@@ -249,7 +249,7 @@ export async function deleteChecklistItem(itemId: string) {
 }
 
 export async function getTaskLabels(projectId: string) {
-  return Label.find({ projectId }).lean();
+  return toIdArray(await Label.find({ projectId }).lean());
 }
 
 export async function createLabel(
@@ -283,7 +283,7 @@ export async function getUserAssignedTasks(userId: string) {
     .sort({ dueDate: 1 })
     .lean();
 
-  return tasks;
+  return toIdArray(tasks);
 }
 
 export async function createActivity(data: {

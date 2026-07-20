@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useProject } from "@/hooks/use-projects";
@@ -15,12 +14,8 @@ import {
 import { Board } from "@/components/board";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { ProjectLayout } from "@/components/project-layout";
+import { TaskDetailDrawer } from "@/components/task-detail-drawer-lazy";
 import { Task } from "@/hooks/use-tasks";
-
-const TaskDetailDrawer = dynamic(
-  () => import("@/components/task-detail-drawer").then((m) => ({ default: m.TaskDetailDrawer })),
-  { ssr: false }
-);
 
 interface BoardPageProps {
   projectId: string;

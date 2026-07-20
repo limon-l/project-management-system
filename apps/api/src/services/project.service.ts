@@ -10,7 +10,7 @@ import {
   TaskDependency,
   Notification,
 } from "../models/index.js";
-import { AppError, validate, slugify, generatePosition } from "../utils/helpers.js";
+import { AppError, validate, slugify, generatePosition, toId, toIdArray } from "../utils/helpers.js";
 import {
   createProjectSchema,
   updateProjectSchema,
@@ -73,9 +73,10 @@ export async function createProject(
 }
 
 export async function getWorkspaceProjects(workspaceId: string) {
-  return Project.find({ workspaceId, archived: false })
+  const projects = await Project.find({ workspaceId, archived: false })
     .sort({ updatedAt: -1 })
     .lean();
+  return toIdArray(projects);
 }
 
 export async function getProjectById(projectId: string) {
@@ -83,7 +84,7 @@ export async function getProjectById(projectId: string) {
   if (!project) {
     throw new AppError(404, "NOT_FOUND", "Project not found");
   }
-  return project;
+  return toId(project);
 }
 
 export async function updateProject(
@@ -184,11 +185,12 @@ export async function getProjectBoard(projectId: string) {
   if (!board) {
     throw new AppError(404, "NOT_FOUND", "Board not found");
   }
-  return board;
+  return toId(board);
 }
 
 export async function getProjectColumns(boardId: string) {
-  return Column.find({ boardId }).sort({ position: 1 }).lean();
+  const columns = await Column.find({ boardId }).sort({ position: 1 }).lean();
+  return toIdArray(columns);
 }
 
 export async function getProjectMembers(projectId: string) {

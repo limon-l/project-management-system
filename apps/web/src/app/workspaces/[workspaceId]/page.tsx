@@ -4,12 +4,17 @@ import { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { useProjects, useCreateProject, type Project } from "@/hooks/use-projects";
 import { useWorkspaceMembers, type WorkspaceMember } from "@/hooks/use-workspace-members";
 import { useWorkspaceRealtime } from "@/hooks/use-realtime";
-import { WorkspaceAnalytics } from "@/components/workspace-analytics";
+
+const WorkspaceAnalytics = dynamic(
+  () => import("@/components/workspace-analytics").then((m) => ({ default: m.WorkspaceAnalytics })),
+  { ssr: false }
+);
 
 function LoadingSkeleton() {
   return (

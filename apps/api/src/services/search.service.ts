@@ -1,4 +1,5 @@
 import { Task, Project, User } from "../models/index.js";
+import { toIdArray } from "../utils/helpers.js";
 
 interface SearchOptions {
   workspaceId: string;
@@ -63,7 +64,7 @@ export async function searchWorkspace(opts: SearchOptions) {
 
     const tasks = await tasksQuery.lean();
 
-    results.tasks = tasks;
+    results.tasks = toIdArray(tasks);
   }
 
   // Search projects
@@ -84,7 +85,7 @@ export async function searchWorkspace(opts: SearchOptions) {
 
     const projects = await projectsQuery.lean();
 
-    results.projects = projects;
+    results.projects = toIdArray(projects);
   }
 
   // Search members

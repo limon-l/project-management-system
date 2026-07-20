@@ -4,20 +4,38 @@ import type { ServerToClientEvents, ClientToServerEvents } from "@boardflow/shar
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
+let lastAuthFailure = 0;
+const AUTH_COOLDOWN_MS = 10_000;
 
 export function getSocket(): Socket<ServerToClientEvents, ClientToServerEvents> {
   socket ??= io(SOCKET_URL, {
     auth: async () => {
+      // Prevent hammering the endpoint after a recent failure
+      if (Date.now() - lastAuthFailure < AUTH_COOLDOWN_MS) {
+        return {};
+      }
       try {
-        const response = await fetch(`${SOCKET_URL}/api/auth/socket-token`, {
+        // Fetch the socket token through the same-origin Next.js proxy so the
+        // session cookie is sent automatically (avoids cross-origin cookie issues
+        // with SameSite=Lax in production).
+        const response = await fetch(`/api/auth/socket-token`, {
           credentials: "include",
         });
+        if (!response.ok) {
+          lastAuthFailure = Date.now();
+          return {};
+        }
         const body = (await response.json()) as {
           success?: boolean;
           data?: { token?: string };
         };
-        return body.success && body.data?.token ? { token: body.data.token } : {};
+        if (body.success && body.data?.token) {
+          return { token: body.data.token };
+        }
+        lastAuthFailure = Date.now();
+        return {};
       } catch {
+        lastAuthFailure = Date.now();
         return {};
       }
     },

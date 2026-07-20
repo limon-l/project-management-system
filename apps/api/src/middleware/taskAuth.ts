@@ -1,6 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { Task, ProjectMember } from "../models/index.js";
-import { sendError } from "../utils/helpers.js";
+import { sendError, isValidObjectId } from "../utils/helpers.js";
 import { ERROR_CODES } from "@boardflow/shared";
 
 export async function requireTaskAccess(
@@ -18,6 +18,11 @@ export async function requireTaskAccess(
 
   if (!taskId) {
     sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Task ID required");
+    return;
+  }
+
+  if (!isValidObjectId(taskId)) {
+    sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Invalid task ID");
     return;
   }
 
@@ -52,6 +57,11 @@ export async function requireCommentAccess(
 
   if (!commentId) {
     sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Comment ID required");
+    return;
+  }
+
+  if (!isValidObjectId(commentId)) {
+    sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Invalid comment ID");
     return;
   }
 
@@ -96,6 +106,11 @@ export async function requireAttachmentAccess(
     return;
   }
 
+  if (!isValidObjectId(id)) {
+    sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Invalid attachment ID");
+    return;
+  }
+
   const { Attachment, Task, ProjectMember } = await import("../models/index.js");
   const attachment = await Attachment.findById(id).select("taskId").lean();
   if (!attachment) {
@@ -134,6 +149,11 @@ export async function requireChecklistItemAccess(
 
   if (!itemId) {
     sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Checklist item ID required");
+    return;
+  }
+
+  if (!isValidObjectId(itemId)) {
+    sendError(reply, 400, ERROR_CODES.BAD_REQUEST, "Invalid checklist item ID");
     return;
   }
 

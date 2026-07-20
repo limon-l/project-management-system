@@ -22,6 +22,5 @@ const columnSchema = new Schema<IColumn>(
 );
 
 columnSchema.index({ boardId: 1, position: 1 });
-columnSchema.index({ boardId: 1 });
 
 export const Column = mongoose.model<IColumn>("Column", columnSchema);

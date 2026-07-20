@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/use-auth";
 import { useRealtime } from "@/hooks/use-realtime";
 import {
@@ -13,12 +12,8 @@ import {
   type Task,
 } from "@/hooks/use-tasks";
 import { CreateTaskForm } from "@/components/create-task-form";
+import { TaskDetailDrawer } from "@/components/task-detail-drawer-lazy";
 import { cn } from "@/lib/utils";
-
-const TaskDetailDrawer = dynamic(
-  () => import("@/components/task-detail-drawer").then((m) => ({ default: m.TaskDetailDrawer })),
-  { ssr: false }
-);
 
 type SortField = "key" | "title" | "priority" | "dueDate" | "assignee";
 type SortDirection = "asc" | "desc";

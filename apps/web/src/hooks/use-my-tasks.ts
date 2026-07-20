@@ -11,7 +11,7 @@ export interface MyTask {
   dueDate: string | null;
   completed: boolean;
   projectId: string;
-  assigneeIds: { _id: string; name: string; avatarUrl: string | null }[];
+  assigneeIds: { id: string; name: string; avatarUrl: string | null }[];
 }
 
 export function useMyTasks() {

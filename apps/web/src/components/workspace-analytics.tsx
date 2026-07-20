@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { API_URL as API } from "@/lib/utils";
-
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/utils";
 
 interface WorkspaceAnalytics {
   totalProjects: number;
@@ -29,29 +28,14 @@ interface WorkspaceAnalytics {
 }
 
 export function WorkspaceAnalytics({ workspaceId }: { workspaceId: string }) {
-  const [data, setData] = useState<WorkspaceAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ["workspaceAnalytics", workspaceId],
+    queryFn: () => api<WorkspaceAnalytics>(`/api/workspaces/${workspaceId}/analytics`),
+    enabled: !!workspaceId,
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(
-          `${API}/api/workspaces/${workspaceId}/analytics`,
-          { credentials: "include" },
-        );
-        if (!res.ok) return;
-        const json = await res.json();
-        if (json.success) setData(json.data);
-      } catch {
-        // silent
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [workspaceId]);
-
-  if (loading)
+  if (isLoading)
     return (
       <div className="p-4 text-[13px] text-muted-foreground">
         Loading analytics...

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { API_URL as API } from "@/lib/utils";
-
+import { api } from "@/lib/utils";
 
 interface Task {
   id: string;
@@ -14,7 +14,7 @@ interface Task {
   dueDate: string | null;
   completed: boolean;
   projectId: string;
-  assigneeIds: { _id: string; name: string; avatarUrl: string | null }[];
+  assigneeIds: { id: string; name: string; avatarUrl: string | null }[];
 }
 
 interface Summary {
@@ -22,6 +22,11 @@ interface Summary {
   completed: number;
   overdue: number;
   dueToday: number;
+}
+
+interface MyWorkResponse {
+  tasks: Task[];
+  groups?: Record<string, Task[]>;
 }
 
 const PRIORITY_STYLES: Record<string, { bg: string; text: string }> = {
@@ -35,65 +40,37 @@ const PRIORITY_STYLES: Record<string, { bg: string; text: string }> = {
 export default function MyWorkPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [groupBy, setGroupBy] = useState<"dueDate" | "priority" | "project">(
     "dueDate",
   );
-  const [groups, setGroups] = useState<Record<string, Task[] | undefined>>({});
+
+  const { data: myWorkData, isLoading: tasksLoading } = useQuery<MyWorkResponse>({
+    queryKey: ["myWorkTasks", groupBy],
+    queryFn: () => api<MyWorkResponse>(`/api/my-work/tasks?groupBy=${groupBy}`),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
+  const { data: summary, isLoading: summaryLoading } = useQuery<Summary>({
+    queryKey: ["myWorkSummary"],
+    queryFn: () => api<Summary>("/api/my-work/summary"),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
+    if (!authLoading && !user) {
       router.push("/login");
-      return;
     }
+  }, [user, authLoading, router]);
 
-    async function load() {
-      try {
-        const [tasksRes, summaryRes] = await Promise.all([
-          fetch(`${API}/api/my-work/tasks?groupBy=${groupBy}`, {
-            credentials: "include",
-          }),
-          fetch(`${API}/api/my-work/summary`, { credentials: "include" }),
-        ]);
-        if (!tasksRes.ok || !summaryRes.ok) {
-          setError("Failed to load tasks. Please try again.");
-          return;
-        }
-        const tasksJson = (await tasksRes.json()) as {
-          success: boolean;
-          data: { tasks: Task[]; groups?: Record<string, Task[]> };
-        };
-        const summaryJson = (await summaryRes.json()) as {
-          success: boolean;
-          data: Summary;
-        };
-        if (tasksJson.success) {
-          setTasks(tasksJson.data.tasks);
-          setGroups(tasksJson.data.groups ?? {});
-        }
-        if (summaryJson.success) setSummary(summaryJson.data);
-      } catch {
-        setError("Failed to load tasks. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    void load();
-  }, [user, authLoading, router, groupBy]);
+  const tasks = myWorkData?.tasks ?? [];
+  const groups = myWorkData?.groups ?? {};
+  const loading = authLoading || tasksLoading || summaryLoading;
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="p-10 text-center text-muted-foreground">Loading...</div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-10 text-center text-destructive">{error}</div>
     );
   }
 

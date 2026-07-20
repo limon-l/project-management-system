@@ -1,5 +1,5 @@
 import { Workspace, WorkspaceMember, Invitation, User, Project, Board, Column, Task } from "../models/index.js";
-import { AppError, validate, slugify } from "../utils/helpers.js";
+import { AppError, validate, slugify, toId, toIdArray } from "../utils/helpers.js";
 import {
   createWorkspaceSchema,
   updateWorkspaceSchema,
@@ -41,7 +41,7 @@ export async function getWorkspaceBySlug(slug: string) {
   if (!workspace) {
     throw new AppError(404, "NOT_FOUND", "Workspace not found");
   }
-  return workspace;
+  return toId(workspace);
 }
 
 export async function getWorkspaceById(workspaceId: string) {
@@ -49,7 +49,7 @@ export async function getWorkspaceById(workspaceId: string) {
   if (!workspace) {
     throw new AppError(404, "NOT_FOUND", "Workspace not found");
   }
-  return workspace;
+  return toId(workspace);
 }
 
 export async function updateWorkspace(
@@ -81,11 +81,11 @@ export async function getUserWorkspaces(userId: string) {
     .populate("workspaceId")
     .lean();
 
-  return memberships.map((m) => ({
+  return toIdArray(memberships.map((m) => ({
     ...m.workspaceId as unknown as Record<string, unknown>,
     role: m.role,
     membershipId: m._id.toString(),
-  }));
+  })));
 }
 
 export async function getWorkspaceMembers(workspaceId: string) {
@@ -364,7 +364,8 @@ export async function deleteWorkspace(
 }
 
 export async function getWorkspaceInvitations(workspaceId: string) {
-  return Invitation.find({ workspaceId, status: "pending" })
+  const invitations = await Invitation.find({ workspaceId, status: "pending" })
     .populate("invitedBy", "name")
     .lean();
+  return toIdArray(invitations);
 }

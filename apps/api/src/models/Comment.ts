@@ -28,6 +28,5 @@ const commentSchema = new Schema<IComment>(
 );
 
 commentSchema.index({ taskId: 1, createdAt: 1 });
-commentSchema.index({ taskId: 1 });
 
 export const Comment = mongoose.model<IComment>("Comment", commentSchema);

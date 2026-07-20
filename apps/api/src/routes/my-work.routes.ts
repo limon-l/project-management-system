@@ -13,11 +13,41 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
         groupBy?: "project" | "dueDate" | "priority";
       };
 
-      const tasks = await Task.find({ assigneeIds: userId })
+      const raw = await Task.find({ assigneeIds: userId })
         .populate("assigneeIds", "name avatarUrl")
         .populate("labelIds", "name color")
         .sort({ dueDate: 1 })
         .lean();
+
+      const tasks = raw.map((t) => ({
+        id: t._id.toString(),
+        key: t.key,
+        title: t.title,
+        priority: t.priority,
+        dueDate: t.dueDate,
+        completed: t.completed,
+        projectId: t.projectId.toString(),
+        assigneeIds: (Array.isArray(t.assigneeIds) ? t.assigneeIds : []).map(
+          (a: unknown) => {
+            const u = a as { _id?: { toString(): string }; id?: string; name?: string; avatarUrl?: string | null };
+            return {
+              id: u._id?.toString() ?? u.id ?? "",
+              name: u.name ?? "",
+              avatarUrl: u.avatarUrl ?? null,
+            };
+          }
+        ),
+        labelIds: (Array.isArray(t.labelIds) ? t.labelIds : []).map(
+          (l: unknown) => {
+            const label = l as { _id?: { toString(): string }; id?: string; name?: string; color?: string };
+            return {
+              id: label._id?.toString() ?? label.id ?? "",
+              name: label.name ?? "",
+              color: label.color ?? "",
+            };
+          }
+        ),
+      }));
 
       const now = new Date();
       const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
@@ -26,7 +56,7 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
       if (groupBy === "project") {
         const grouped: Record<string, typeof tasks> = {};
         for (const t of tasks) {
-          const pid = t.projectId.toString();
+          const pid = t.projectId;
           if (!grouped[pid]) grouped[pid] = [];
           grouped[pid].push(t);
         }

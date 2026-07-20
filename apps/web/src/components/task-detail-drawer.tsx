@@ -17,7 +17,7 @@ import { useProjectMembers } from "@/hooks/use-project-members";
 import { CommentSection } from "./comment-section";
 import { AttachmentUpload } from "./attachment-upload";
 
-interface TaskDetailDrawerProps {
+export interface TaskDetailDrawerProps {
   taskId: string | null;
   projectId: string;
   currentUserId: string;

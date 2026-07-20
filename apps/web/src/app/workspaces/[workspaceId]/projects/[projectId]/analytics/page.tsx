@@ -3,9 +3,14 @@
 import { use } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ProjectLayout } from "@/components/project-layout";
-import { ProjectAnalytics } from "@/components/project-analytics";
 import { useProjects } from "@/hooks/use-projects";
+
+const ProjectAnalytics = dynamic(
+  () => import("@/components/project-analytics").then((m) => ({ default: m.ProjectAnalytics })),
+  { ssr: false }
+);
 
 export default function ProjectAnalyticsPage({
   params,
