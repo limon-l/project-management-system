@@ -65,16 +65,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     async function fetchNotifications() {
       setLoading(true);
       try {
-        const page = await api<unknown>("/api/notifications");
+        const page = await api<{ items: Notification[]; total: number; page: number; limit: number; pages: number }>("/api/notifications");
         if (!cancelled) {
-          const items =
-            typeof page === "object" &&
-            page !== null &&
-            "items" in page &&
-            Array.isArray(page.items)
-              ? page.items
-              : [];
-          setNotifications(items as Notification[]);
+          setNotifications(page.items);
         }
       } catch {
         // silent

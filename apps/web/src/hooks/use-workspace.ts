@@ -8,6 +8,6 @@ export function useWorkspace(workspaceId: string) {
   return useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: () => api<Workspace>(`/api/workspaces/${workspaceId}`),
-    enabled: !!workspaceId,
+    enabled: !!workspaceId && workspaceId !== "undefined",
   });
 }

@@ -93,18 +93,22 @@ export async function getWorkspaceMembers(workspaceId: string) {
     .populate("userId", "name email avatarUrl")
     .lean();
 
-  return members.map((m) => ({
-    id: m._id.toString(),
-    userId: (m.userId as unknown as { _id: { toString(): string }; name: string; email: string; avatarUrl: string | null })._id.toString(),
-    workspaceId: m.workspaceId.toString(),
-    role: m.role,
-    user: {
-      id: (m.userId as unknown as { _id: { toString(): string }; name: string; email: string; avatarUrl: string | null })._id.toString(),
-      name: (m.userId as unknown as { name: string }).name,
-      avatarUrl: (m.userId as unknown as { avatarUrl: string | null }).avatarUrl,
-    },
-    joinedAt: m.joinedAt,
-  }));
+  return members.map((m) => {
+    const u = m.userId as unknown as { _id: { toString(): string }; name: string; email: string; avatarUrl: string | null };
+    return {
+      id: m._id.toString(),
+      userId: u._id.toString(),
+      workspaceId: m.workspaceId.toString(),
+      role: m.role,
+      user: {
+        id: u._id.toString(),
+        name: u.name,
+        email: u.email,
+        avatarUrl: u.avatarUrl,
+      },
+      joinedAt: m.joinedAt,
+    };
+  });
 }
 
 export async function inviteMember(workspaceId: string, inviterId: string, input: unknown) {

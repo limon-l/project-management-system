@@ -36,6 +36,8 @@ const userSchema = new Schema<IUser>(
   {
     timestamps: true,
     toJSON: {
+      virtuals: true,
+      versionKey: false,
       transform(_doc, ret) {
         const safe = ret as Record<string, unknown>;
         // Capture the identifier before removing MongoDB internals.  Reading

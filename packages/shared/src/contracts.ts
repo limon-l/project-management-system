@@ -393,10 +393,7 @@ export interface SearchContracts {
 // ─── MY WORK ─────────────────────────────────────────────────────
 
 export interface MyWorkContracts {
-  "GET /api/my-work/tasks": {
-    query: {
-      groupBy?: "project" | "dueDate" | "priority";
-    };
-    response: ApiResponse<{ tasks: TaskResponse[] }>;
+  "GET /api/tasks/my": {
+    response: ApiResponse<TaskResponse[]>;
   };
 }

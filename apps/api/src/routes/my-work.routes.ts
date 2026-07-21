@@ -1,9 +1,28 @@
 import type { FastifyInstance } from "fastify";
 import { Task } from "../models/index.js";
 import { authMiddleware } from "../middleware/index.js";
-import { sendSuccess } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { getUserAssignedTasks } from "../services/index.js";
 
 export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
+  // My assigned tasks (used by dashboard "My Tasks" widget)
+  app.get(
+    "/tasks/my",
+    { preHandler: [authMiddleware] },
+    async (request, reply) => {
+      try {
+        const tasks = await getUserAssignedTasks(request.user!.userId);
+        sendSuccess(reply, tasks);
+      } catch (error) {
+        if (error instanceof AppError) {
+          sendError(reply, error.statusCode, error.code, error.message);
+          return;
+        }
+        throw error;
+      }
+    }
+  );
+
   app.get(
     "/my-work/tasks",
     { preHandler: [authMiddleware] },

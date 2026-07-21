@@ -3,6 +3,7 @@ import mongoose, { Schema, type Document } from "mongoose";
 export type WorkspaceRole =
   | "WORKSPACE_OWNER"
   | "WORKSPACE_ADMIN"
+  | "PROJECT_MANAGER"
   | "PROJECT_MEMBER"
   | "VIEWER";
 
@@ -26,7 +27,7 @@ const workspaceMemberSchema = new Schema<IWorkspaceMember>({
   },
   role: {
     type: String,
-    enum: ["WORKSPACE_OWNER", "WORKSPACE_ADMIN", "PROJECT_MEMBER", "VIEWER"],
+    enum: ["WORKSPACE_OWNER", "WORKSPACE_ADMIN", "PROJECT_MANAGER", "PROJECT_MEMBER", "VIEWER"],
     required: true,
   },
   joinedAt: { type: Date, default: Date.now },

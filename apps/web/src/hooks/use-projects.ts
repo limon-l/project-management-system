@@ -22,7 +22,7 @@ export function useProjects(workspaceId: string) {
     queryKey: ["projects", workspaceId],
     queryFn: () =>
       apiArray<Project>(`/api/workspaces/${workspaceId}/projects`),
-    enabled: !!workspaceId,
+    enabled: !!workspaceId && workspaceId !== "undefined",
   });
 }
 

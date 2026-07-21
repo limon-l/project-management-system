@@ -114,16 +114,16 @@ export default function WorkspaceMembersPage({
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                  {member.name?.charAt(0)?.toUpperCase() ?? "?"}
+                  {member.user.name?.charAt(0)?.toUpperCase() ?? "?"}
                 </div>
                 <div>
                   <p className="text-sm font-medium">
-                    {member.name}
+                    {member.user.name}
                     {member.userId === user.id && (
                       <span className="ml-2 text-xs text-muted-foreground">(you)</span>
                     )}
                   </p>
-                  <p className="text-xs text-muted-foreground">{member.email}</p>
+                  <p className="text-xs text-muted-foreground">{member.user.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

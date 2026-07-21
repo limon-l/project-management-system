@@ -5,13 +5,30 @@ import { apiArray } from "@/lib/utils";
 
 export interface MyTask {
   id: string;
+  projectId: string;
+  boardId: string;
+  columnId: string;
+  position: string;
   key: string;
   title: string;
+  description: string | null;
   priority: string;
+  creatorId: string;
+  assignees: {
+    id: string;
+    userId: string;
+    user: { id: string; name: string; avatarUrl: string | null };
+  }[];
+  labels: {
+    id: string;
+    name: string;
+    color: string;
+  }[];
+  startDate: string | null;
   dueDate: string | null;
   completed: boolean;
-  projectId: string;
-  assigneeIds: { id: string; name: string; avatarUrl: string | null }[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function useMyTasks() {

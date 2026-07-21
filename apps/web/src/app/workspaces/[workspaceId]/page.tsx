@@ -263,10 +263,10 @@ export default function WorkspaceOverviewPage({
                   className="flex items-center gap-2 rounded-lg border border-border px-3 py-2"
                 >
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {member.name?.charAt(0)?.toUpperCase() ?? "?"}
+                    {member.user.name?.charAt(0)?.toUpperCase() ?? "?"}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{member.name}</p>
+                    <p className="truncate text-sm font-medium">{member.user.name}</p>
                     <p className="truncate text-[11px] text-muted-foreground capitalize">
                       {member.role?.replace("_", " ").toLowerCase()}
                     </p>

@@ -71,7 +71,7 @@ export function useProjectTasks(projectId: string) {
   return useQuery({
     queryKey: ["tasks", projectId],
     queryFn: () => apiArray<Task>(`/api/projects/${projectId}/tasks`),
-    enabled: !!projectId,
+    enabled: !!projectId && projectId !== "undefined",
   });
 }
 
@@ -79,7 +79,7 @@ export function useProjectColumns(projectId: string) {
   return useQuery({
     queryKey: ["columns", projectId],
     queryFn: () => apiArray<Column>(`/api/projects/${projectId}/columns`),
-    enabled: !!projectId,
+    enabled: !!projectId && projectId !== "undefined",
   });
 }
 

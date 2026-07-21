@@ -14,7 +14,6 @@ import {
   getTaskLabels,
   createLabel,
   deleteLabel,
-  getUserAssignedTasks,
 } from "../services/index.js";
 import { authMiddleware, authorize } from "../middleware/index.js";
 import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
@@ -295,21 +294,4 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     }
   );
 
-  // My assigned tasks
-  app.get(
-    "/tasks/my",
-    { preHandler: [authMiddleware] },
-    async (request, reply) => {
-      try {
-        const tasks = await getUserAssignedTasks(request.user!.userId);
-        sendSuccess(reply, tasks);
-      } catch (error) {
-        if (error instanceof AppError) {
-          sendError(reply, error.statusCode, error.code, error.message);
-          return;
-        }
-        throw error;
-      }
-    }
-  );
 }
