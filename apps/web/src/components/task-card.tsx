@@ -95,9 +95,9 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
               <div
                 key={a.id}
                 className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-surface bg-primary text-[8px] font-bold text-primary-foreground"
-                title={a.user.name}
+                title={a.name}
               >
-                {a.user.name.charAt(0).toUpperCase()}
+                {a.name.charAt(0).toUpperCase()}
               </div>
             ))}
             {task.assignees.length > 3 && (

@@ -66,8 +66,8 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
       const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
       comparison = aDate - bDate;
     } else {
-      const aName = a.assignees?.[0]?.user?.name ?? "";
-      const bName = b.assignees?.[0]?.user?.name ?? "";
+      const aName = a.assignees?.[0]?.name ?? "";
+      const bName = b.assignees?.[0]?.name ?? "";
       comparison = aName.localeCompare(bName);
     }
     return sortDirection === "asc" ? comparison : -comparison;
@@ -312,9 +312,9 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
                           <div
                             key={a.id}
                             className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-primary text-[10px] font-bold text-primary-foreground"
-                            title={a.user.name}
+                            title={a.name}
                           >
-                            {a.user.name.charAt(0).toUpperCase()}
+                            {a.name.charAt(0).toUpperCase()}
                           </div>
                         ))}
                         {task.assignees && task.assignees.length > 3 && (

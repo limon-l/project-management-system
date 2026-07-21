@@ -48,7 +48,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.get("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
-      const workspace = await getWorkspaceById(workspaceId);
+      const workspace = await getWorkspaceById(workspaceId, request.user!.userId);
       sendSuccess(reply, workspace);
     } catch (error) {
       if (error instanceof AppError) {

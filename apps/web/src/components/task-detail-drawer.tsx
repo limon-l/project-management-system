@@ -197,9 +197,9 @@ export function TaskDetailDrawer({
                       className="flex items-center gap-1.5 rounded-full border border-border px-2 py-1"
                     >
                       <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                        {a.user.name.charAt(0).toUpperCase()}
+                        {a.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs font-medium">{a.user.name}</span>
+                      <span className="text-xs font-medium">{a.name}</span>
                     </div>
                   ))
                 ) : (

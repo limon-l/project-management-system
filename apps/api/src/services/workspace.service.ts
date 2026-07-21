@@ -44,12 +44,19 @@ export async function getWorkspaceBySlug(slug: string) {
   return toId(workspace);
 }
 
-export async function getWorkspaceById(workspaceId: string) {
+export async function getWorkspaceById(workspaceId: string, userId?: string): Promise<Record<string, unknown> & { id: string }> {
   const workspace = await Workspace.findById(workspaceId).lean();
   if (!workspace) {
     throw new AppError(404, "NOT_FOUND", "Workspace not found");
   }
-  return toId(workspace);
+  const result = toId(workspace);
+  if (userId) {
+    const membership = await WorkspaceMember.findOne({ userId, workspaceId }).lean();
+    if (membership) {
+      return { ...result, role: membership.role };
+    }
+  }
+  return result;
 }
 
 export async function updateWorkspace(

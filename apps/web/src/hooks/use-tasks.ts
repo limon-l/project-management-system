@@ -5,8 +5,8 @@ import { api, apiArray } from "@/lib/utils";
 
 export interface TaskAssignee {
   id: string;
-  userId: string;
-  user: { id: string; name: string; avatarUrl: string | null };
+  name: string;
+  avatarUrl: string | null;
 }
 
 export interface TaskLabel {

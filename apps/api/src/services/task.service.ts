@@ -10,6 +10,26 @@ import {
 import { emitToProject } from "../socket/index.js";
 import { notifyTaskAssignment } from "./notification.service.js";
 
+function formatTask(raw: Record<string, unknown>) {
+  const task = toId(raw);
+  const assignees = (Array.isArray(task.assigneeIds) ? task.assigneeIds : []).map(
+    (a: Record<string, unknown>) => ({
+      id: (a._id ?? a.id ?? "").toString(),
+      name: a.name ?? "",
+      avatarUrl: a.avatarUrl ?? null,
+    })
+  );
+  const labels = (Array.isArray(task.labelIds) ? task.labelIds : []).map(
+    (l: Record<string, unknown>) => ({
+      id: (l._id ?? l.id ?? "").toString(),
+      name: l.name ?? "",
+      color: l.color ?? "#808080",
+    })
+  );
+  const { assigneeIds, labelIds, ...rest } = task;
+  return { ...rest, assignees, labels };
+}
+
 export async function getProjectTasks(projectId: string, columnId?: string) {
   const filter: Record<string, unknown> = { projectId };
   if (columnId) filter.columnId = columnId;
@@ -20,7 +40,7 @@ export async function getProjectTasks(projectId: string, columnId?: string) {
     .sort({ position: 1 })
     .lean();
 
-  return toIdArray(tasks);
+  return tasks.map(formatTask);
 }
 
 export async function getTaskById(taskId: string) {
@@ -33,7 +53,7 @@ export async function getTaskById(taskId: string) {
   if (!task) {
     throw new AppError(404, "NOT_FOUND", "Task not found");
   }
-  return toId(task);
+  return formatTask(task as unknown as Record<string, unknown>);
 }
 
 export async function createTask(
@@ -285,7 +305,7 @@ export async function getUserAssignedTasks(userId: string) {
     .sort({ dueDate: 1 })
     .lean();
 
-  return toIdArray(tasks);
+  return tasks.map(formatTask);
 }
 
 export async function createActivity(data: {
