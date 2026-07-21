@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { api, ApiError } from "@/lib/utils";
+import { PUBLIC_ROUTES } from "@/lib/constants";
 
 interface User {
   id: string;
@@ -23,8 +24,6 @@ interface SessionContextValue {
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
-
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/privacy", "/terms"];
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

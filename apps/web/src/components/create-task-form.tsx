@@ -3,13 +3,11 @@
 import { useState } from "react";
 
 interface CreateTaskFormProps {
-  columnId: string;
   onSubmit: (title: string) => void;
   onCancel: () => void;
 }
 
 export function CreateTaskForm({
-  columnId: _columnId,
   onSubmit,
   onCancel,
 }: CreateTaskFormProps) {

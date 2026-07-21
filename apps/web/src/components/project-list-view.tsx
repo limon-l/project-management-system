@@ -7,7 +7,6 @@ import {
   useProjectTasks,
   useProjectColumns,
   useCreateTask,
-  useMoveTask,
   useDeleteTask,
   type Task,
 } from "@/hooks/use-tasks";
@@ -43,7 +42,6 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
   const { data: tasks = [], isLoading: tasksLoading } = useProjectTasks(projectId);
   const { data: columns = [], isLoading: columnsLoading } = useProjectColumns(projectId);
   const createTask = useCreateTask(projectId);
-  const _moveTask = useMoveTask(projectId);
   const deleteTask = useDeleteTask(projectId);
   useRealtime(projectId);
 
@@ -360,7 +358,6 @@ export function ProjectListView({ projectId }: ProjectListViewProps) {
         <div className="fixed inset-0 z-30 bg-black/20" onClick={() => { setAddingToColumn(null); }}>
           <div className="absolute left-1/2 top-1/2 w-96 -translate-x-1/2 -translate-y-1/2">
             <CreateTaskForm
-              columnId={addingToColumn}
               onSubmit={handleCreateTask}
               onCancel={() => { setAddingToColumn(null); }}
             />

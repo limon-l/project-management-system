@@ -7,13 +7,11 @@ import { useAddComment, type Comment } from "@/hooks/use-tasks";
 interface CommentSectionProps {
   taskId: string;
   comments: Comment[];
-  currentUserId: string;
 }
 
 export function CommentSection({
   taskId,
   comments,
-  currentUserId: _currentUserId,
 }: CommentSectionProps) {
   const [newComment, setNewComment] = useState("");
   const addComment = useAddComment();

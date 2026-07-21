@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
+import { Toaster } from "sonner";
 import { QueryProvider } from "./query-provider";
 import { SessionProvider } from "./session-provider";
 import { SocketProvider } from "./socket-provider";
@@ -11,7 +12,10 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryProvider>
       <SessionProvider>
         <SocketProvider>
-          <NotificationProvider>{children}</NotificationProvider>
+          <NotificationProvider>
+            {children}
+            <Toaster position="bottom-right" richColors />
+          </NotificationProvider>
         </SocketProvider>
       </SessionProvider>
     </QueryProvider>

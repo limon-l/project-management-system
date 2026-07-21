@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import mongoose from "mongoose";
+import { readFileSync, existsSync } from "node:fs";
+import path from "node:path";
 import { authRoutes } from "./auth.routes.js";
 import { workspaceRoutes } from "./workspace.routes.js";
 import { projectRoutes } from "./project.routes.js";
@@ -25,28 +27,28 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(analyticsRoutes, { prefix: "/api" });
   await app.register(dependencyRoutes, { prefix: "/api" });
 
-  // Serve uploaded files in development
+  // Serve uploaded files in development with path traversal protection
   if (process.env.NODE_ENV !== "production") {
-    const { readFileSync, existsSync } = await import("fs");
-    const path = await import("path");
+    const uploadDir = path.resolve(process.env.UPLOAD_DIR || "./uploads");
     app.get("/uploads/:filepath*", async (request, reply) => {
       const params = request.params as { filepath: string };
-      const filepath = path.join(
-        process.env.UPLOAD_DIR || "./uploads",
-        params.filepath
-      );
-      if (!existsSync(filepath)) {
+      const resolved = path.resolve(uploadDir, params.filepath);
+      if (!resolved.startsWith(uploadDir + path.sep) && resolved !== uploadDir) {
+        reply.code(403).send({ error: "Forbidden" });
+        return;
+      }
+      if (!existsSync(resolved)) {
         reply.code(404).send({ error: "File not found" });
         return;
       }
-      const content = readFileSync(filepath);
+      const content = readFileSync(resolved);
       reply.type("application/octet-stream").send(content);
     });
   }
 
   // Health check
   app.get("/api/health", async (_request, reply) => {
-    const dbStatus = (mongoose.connection.readyState as any) === 1 ? "connected" : "disconnected";
+    const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
     const status = dbStatus === "connected" ? "ok" : "error";
     reply.status(status === "ok" ? 200 : 503).send({
       status,

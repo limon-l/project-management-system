@@ -96,22 +96,32 @@ export async function createComment(
     const project = await Project.findById(projectId).select("workspaceId").lean();
     workspaceId = project?.workspaceId?.toString();
 
-    // Detect @mentions
+    // Detect @mentions — batch lookup
     const mentionRegex = /@(\w+)/g;
+    const mentionNames = new Set<string>();
     let match: RegExpExecArray | null;
     while ((match = mentionRegex.exec(data.content)) !== null) {
-      const mentionedUser = await User.findOne({ name: match[1] }).select("_id").lean();
-      if (mentionedUser && workspaceId) {
-        await notifyMention(
-          mentionedUser._id.toString(),
-          authorId,
-          "comment",
-          comment._id.toString(),
-          projectId,
-          workspaceId,
-          `in a comment on task ${taskId}`
-        );
-      }
+      mentionNames.add(match[1]);
+    }
+
+    if (mentionNames.size > 0 && workspaceId) {
+      const wsId = workspaceId;
+      const mentionedUsers = await User.find({ name: { $in: Array.from(mentionNames) } })
+        .select("_id name")
+        .lean();
+      await Promise.all(
+        mentionedUsers.map((u) =>
+          notifyMention(
+            u._id.toString(),
+            authorId,
+            "comment",
+            comment._id.toString(),
+            projectId,
+            wsId,
+            `in a comment on task ${taskId}`
+          )
+        )
+      );
     }
   }
 

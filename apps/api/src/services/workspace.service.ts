@@ -300,6 +300,7 @@ export async function changeMemberRole(
     throw new AppError(403, "FORBIDDEN", "Cannot assign a role equal to or higher than your own");
   }
 
+  const previousRole = member.role;
   member.role = newRole;
   await member.save();
 
@@ -315,7 +316,7 @@ export async function changeMemberRole(
     actorId: changedBy,
     resourceType: "workspace_member",
     resourceId: memberId,
-    details: { workspaceId, newRole, previousRole: member.role },
+    details: { workspaceId, newRole, previousRole },
   });
 }
 

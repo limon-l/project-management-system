@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { Task, ProjectMember } from "../models/index.js";
+import { Task, ProjectMember, Comment, Attachment, ChecklistItem } from "../models/index.js";
 import { sendError, isValidObjectId } from "../utils/helpers.js";
 import { ERROR_CODES } from "@boardflow/shared";
 
@@ -65,7 +65,6 @@ export async function requireCommentAccess(
     return;
   }
 
-  const { Comment, Task, ProjectMember } = await import("../models/index.js");
   const comment = await Comment.findById(commentId).select("taskId authorId").lean();
   if (!comment) {
     sendError(reply, 404, ERROR_CODES.NOT_FOUND, "Comment not found");
@@ -111,7 +110,6 @@ export async function requireAttachmentAccess(
     return;
   }
 
-  const { Attachment, Task, ProjectMember } = await import("../models/index.js");
   const attachment = await Attachment.findById(id).select("taskId").lean();
   if (!attachment) {
     sendError(reply, 404, ERROR_CODES.NOT_FOUND, "Attachment not found");
@@ -157,7 +155,6 @@ export async function requireChecklistItemAccess(
     return;
   }
 
-  const { ChecklistItem, Task, ProjectMember } = await import("../models/index.js");
   const item = await ChecklistItem.findById(itemId).select("taskId").lean();
   if (!item) {
     sendError(reply, 404, ERROR_CODES.NOT_FOUND, "Checklist item not found");

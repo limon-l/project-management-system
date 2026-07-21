@@ -1,4 +1,4 @@
-import { Task, Project, User } from "../models/index.js";
+import { Task, Project, User, WorkspaceMember } from "../models/index.js";
 import { toIdArray } from "../utils/helpers.js";
 
 interface SearchOptions {
@@ -14,6 +14,10 @@ interface SearchOptions {
   columnId?: string;
   page?: number;
   limit?: number;
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export async function searchWorkspace(opts: SearchOptions) {
@@ -88,13 +92,19 @@ export async function searchWorkspace(opts: SearchOptions) {
     results.projects = toIdArray(projects);
   }
 
-  // Search members
+  // Search members — scoped to workspace
   if (!type || type === "members") {
-    const memberFilter: Record<string, unknown> = {};
+    const memberUserIds = await WorkspaceMember.find({ workspaceId })
+      .select("userId")
+      .lean()
+      .then((members) => members.map((m) => m.userId));
+
+    const memberFilter: Record<string, unknown> = { _id: { $in: memberUserIds } };
     if (textQuery) {
+      const escaped = escapeRegex(textQuery);
       memberFilter.$or = [
-        { name: { $regex: textQuery, $options: "i" } },
-        { email: { $regex: textQuery, $options: "i" } },
+        { name: { $regex: escaped, $options: "i" } },
+        { email: { $regex: escaped, $options: "i" } },
       ];
     }
 

@@ -7,8 +7,10 @@ t.txt
 .env
 .env.local
 .env.*.local
+**/.env
 coverage
 playwright-report
 test-results
 *.log
 .DS_Store
+PROFESSIONAL-ENHANCEMENT-PLAN.md

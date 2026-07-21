@@ -40,7 +40,7 @@ mongoose.connection.on("connected", () => {
 });
 
 export async function connectDatabase(): Promise<void> {
-  const state = mongoose.connection.readyState as any;
+  const state = mongoose.connection.readyState;
   // Check if we already have an active connection (1 = connected, 2 = connecting)
   if (state === 1 || state === 2) {
     return;
@@ -58,7 +58,7 @@ export async function connectDatabase(): Promise<void> {
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  const state = mongoose.connection.readyState as any;
+  const state = mongoose.connection.readyState;
   if (state === 0) {
     return;
   }

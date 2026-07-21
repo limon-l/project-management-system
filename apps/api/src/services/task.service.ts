@@ -106,15 +106,17 @@ export async function updateTask(taskId: string, input: unknown, userId?: string
       const project = await Project.findById(task.projectId).select("workspaceId").lean();
       const workspaceId = project?.workspaceId?.toString();
       if (workspaceId) {
-        for (const assigneeId of newAssigneeIds) {
-          await notifyTaskAssignment(
-            taskId,
-            task.projectId.toString(),
-            workspaceId,
-            userId,
-            assigneeId
-          );
-        }
+        await Promise.all(
+          newAssigneeIds.map((assigneeId: string) =>
+            notifyTaskAssignment(
+              taskId,
+              task.projectId.toString(),
+              workspaceId,
+              userId,
+              assigneeId
+            )
+          )
+        );
       }
     }
   }

@@ -83,7 +83,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Update project
   app.patch(
     "/projects/:projectId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -102,7 +102,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Archive project
   app.post(
     "/projects/:projectId/archive",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -121,7 +121,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Delete project
   app.delete(
     "/projects/:projectId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -198,7 +198,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Add project member
   app.post(
     "/projects/:projectId/members",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -217,7 +217,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Remove project member
   app.delete(
     "/projects/:projectId/members/:memberId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { projectId, memberId } = request.params as {
@@ -258,7 +258,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Create label
   app.post(
     "/projects/:projectId/labels",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
@@ -278,7 +278,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Delete label
   app.delete(
     "/projects/:projectId/labels/:labelId",
-    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_ADMIN" })] },
+    { preHandler: [authMiddleware, authorize({ requireProject: true, minimumProjectRole: "PROJECT_MANAGER" })] },
     async (request, reply) => {
       try {
         const { labelId } = request.params as { labelId: string };

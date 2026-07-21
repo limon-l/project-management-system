@@ -1,18 +1,8 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { formatRelativeTime } from "@/lib/utils";
 import { useNotifications } from "../providers/notification-provider";
-
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${String(mins)}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${String(hrs)}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${String(days)}d ago`;
-}
 
 export function NotificationBell() {
   const { unreadCount, notifications, open, setOpen, markRead, loading } =
@@ -103,7 +93,7 @@ export function NotificationBell() {
                     {n.message}
                   </p>
                   <span className="mt-1 block text-[11px] text-muted-foreground">
-                    {timeAgo(n.createdAt)}
+                    {formatRelativeTime(n.createdAt)}
                   </span>
                 </div>
                 {!n.read && (

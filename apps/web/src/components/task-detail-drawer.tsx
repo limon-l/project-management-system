@@ -13,7 +13,6 @@ import {
   useAddDependency,
   useDeleteDependency,
 } from "@/hooks/use-tasks";
-import { useProjectMembers } from "@/hooks/use-project-members";
 import { CommentSection } from "./comment-section";
 import { AttachmentUpload } from "./attachment-upload";
 
@@ -35,13 +34,12 @@ const priorityColors: Record<string, string> = {
 export function TaskDetailDrawer({
   taskId,
   projectId,
-  currentUserId,
+  currentUserId: _currentUserId,
   onClose,
 }: TaskDetailDrawerProps) {
   const { data: task } = useTaskDetail(taskId);
   const { data: checklist = [] } = useTaskChecklist(taskId);
   const { data: commentsData } = useTaskComments(taskId);
-  const { data: _members = [] } = useProjectMembers(projectId);
   const { data: dependencies } = useTaskDependencies(taskId);
   const updateTask = useUpdateTask(projectId);
   const addChecklistItem = useAddChecklistItem();
@@ -465,7 +463,6 @@ export function TaskDetailDrawer({
             <CommentSection
               taskId={task.id}
               comments={comments}
-              currentUserId={currentUserId}
             />
           </div>
         </div>

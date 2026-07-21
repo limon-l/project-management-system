@@ -111,5 +111,3 @@ export function authorize(options: AuthorizationOptions) {
     }
   };
 }
-
-export { hasRoleHierarchy };

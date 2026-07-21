@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { PUBLIC_ROUTES } from "@/lib/constants";
 import { AppHeader } from "./app-header";
 import { ShortcutsPanel } from "./shortcuts-panel";
 
@@ -10,8 +11,6 @@ const CommandPalette = dynamic(
   () => import("./command-palette").then((m) => ({ default: m.CommandPalette })),
   { ssr: false }
 );
-
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/privacy", "/terms"];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();

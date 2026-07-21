@@ -66,6 +66,7 @@ export default function MyWorkPage() {
 
   const tasks = myWorkData?.tasks ?? [];
   const groups = myWorkData?.groups ?? {};
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- boolean OR: any truthy means loading
   const loading = authLoading || tasksLoading || summaryLoading;
 
   if (loading) {
@@ -167,7 +168,7 @@ export default function MyWorkPage() {
       )}
 
       {groupOrder.map((key) => {
-        const section = groups[key];
+        const section = groups?.[key];
         if (!section || section.length === 0) return null;
         return (
           <div key={key} className="mb-8">
