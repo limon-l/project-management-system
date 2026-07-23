@@ -14,19 +14,21 @@ function formatTask(raw: Record<string, unknown>) {
   const task = toId(raw);
   const assignees = (Array.isArray(task.assigneeIds) ? task.assigneeIds : []).map(
     (a: Record<string, unknown>) => ({
-      id: (a._id ?? a.id ?? "").toString(),
+      id: (a._id as { toString(): string } | null)?.toString() ?? (typeof a.id === "string" ? a.id : ""),
       name: a.name ?? "",
       avatarUrl: a.avatarUrl ?? null,
     })
   );
   const labels = (Array.isArray(task.labelIds) ? task.labelIds : []).map(
     (l: Record<string, unknown>) => ({
-      id: (l._id ?? l.id ?? "").toString(),
+      id: (l._id as { toString(): string } | null)?.toString() ?? (typeof l.id === "string" ? l.id : ""),
       name: l.name ?? "",
       color: l.color ?? "#808080",
     })
   );
-  const { assigneeIds, labelIds, ...rest } = task;
+  const rest = Object.fromEntries(
+    Object.entries(task).filter(([k]) => k !== "assigneeIds" && k !== "labelIds")
+  );
   return { ...rest, assignees, labels };
 }
 
@@ -53,7 +55,7 @@ export async function getTaskById(taskId: string) {
   if (!task) {
     throw new AppError(404, "NOT_FOUND", "Task not found");
   }
-  return formatTask(task as unknown as Record<string, unknown>);
+  return formatTask(task);
 }
 
 export async function createTask(
@@ -86,12 +88,12 @@ export async function createTask(
     position: String(sequence * 1000).padStart(7, "0"),
     key,
     title: data.title,
-    priority: data.priority || "NO_PRIORITY",
+    priority: data.priority ?? "NO_PRIORITY",
     creatorId,
-    assigneeIds: data.assigneeIds || [],
-    labelIds: data.labelIds || [],
-    startDate: data.startDate || null,
-    dueDate: data.dueDate || null,
+    assigneeIds: data.assigneeIds ?? [],
+    labelIds: data.labelIds ?? [],
+    startDate: data.startDate ?? null,
+    dueDate: data.dueDate ?? null,
     sequence,
     completed: false,
     watcherIds: [creatorId],
@@ -124,7 +126,7 @@ export async function updateTask(taskId: string, input: unknown, userId?: string
     );
     if (newAssigneeIds.length > 0 && userId) {
       const project = await Project.findById(task.projectId).select("workspaceId").lean();
-      const workspaceId = project?.workspaceId?.toString();
+      const workspaceId = project?.workspaceId.toString();
       if (workspaceId) {
         await Promise.all(
           newAssigneeIds.map((assigneeId: string) =>
@@ -324,6 +326,6 @@ export async function createActivity(data: {
     entityId: data.entityId,
     projectId: data.projectId,
     workspaceId: data.workspaceId,
-    metadata: data.metadata || {},
+    metadata: data.metadata ?? {},
   });
 }

@@ -11,7 +11,7 @@ export async function verifySocketSession(
   socket: AuthenticatedSocket,
   next: (err?: Error) => void
 ): Promise<void> {
-  const socketToken = verifySocketToken(socket.handshake.auth?.token);
+  const socketToken = verifySocketToken(socket.handshake.auth.token);
   const cookie = socket.handshake.headers.cookie;
   const sessionToken = /session=([^;]+)/.exec(cookie ?? "")?.[1];
 

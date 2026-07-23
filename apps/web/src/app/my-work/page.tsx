@@ -168,8 +168,8 @@ export default function MyWorkPage() {
       )}
 
       {groupOrder.map((key) => {
-        const section = groups?.[key];
-        if (!section || section.length === 0) return null;
+        const section = groups[key];
+        if (section.length === 0) return null;
         return (
           <div key={key} className="mb-8">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

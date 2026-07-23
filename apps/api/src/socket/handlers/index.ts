@@ -3,7 +3,11 @@ import type { AuthenticatedSocket } from "../auth.js";
 
 export function registerHandlers(io: Server): void {
   io.on("connection", (socket: AuthenticatedSocket) => {
-    const userId = socket.userId!;
+    const userId = socket.userId;
+    if (!userId) {
+      socket.disconnect(true);
+      return;
+    }
 
     // Auto-join personal notification room
     socket.join(`user:${userId}`);

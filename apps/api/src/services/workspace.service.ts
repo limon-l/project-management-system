@@ -23,7 +23,7 @@ export async function createWorkspace(userId: string, input: unknown) {
   const workspace = await Workspace.create({
     name: data.name,
     slug,
-    description: data.description || null,
+    description: data.description ?? null,
     ownerId: userId,
   });
 
@@ -213,11 +213,11 @@ export async function respondToInvitation(
     emitToWorkspace(workspaceId, "workspace:member_joined", {
       member: {
         id: populated._id.toString(),
-        userId: u._id.toString(),
+        userId: u._id,
         workspaceId,
         role: populated.role,
         user: {
-          id: u._id.toString(),
+          id: u._id,
           name: u.name,
           avatarUrl: u.avatarUrl,
         },
@@ -252,7 +252,9 @@ export async function removeMember(
     throw new AppError(403, "FORBIDDEN", "Not a workspace member");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive fallback
   const removerHierarchy = ROLE_HIERARCHY[remover.role] ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive fallback
   const memberHierarchy = ROLE_HIERARCHY[member.role as WorkspaceRole] ?? 0;
 
   if (removerHierarchy <= memberHierarchy) {
@@ -295,8 +297,11 @@ export async function changeMemberRole(
     throw new AppError(403, "FORBIDDEN", "Not a workspace member");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive fallback
   const changerHierarchy = ROLE_HIERARCHY[changer.role] ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive fallback
   const memberHierarchy = ROLE_HIERARCHY[member.role as WorkspaceRole] ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive fallback
   const newRoleHierarchy = ROLE_HIERARCHY[newRole] ?? 0;
 
   if (changerHierarchy <= memberHierarchy) {

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { ConnectionStates } from "mongoose";
 import { getEnv } from "./env.js";
 import { logger } from "../utils/logger.js";
 
@@ -42,7 +42,8 @@ mongoose.connection.on("connected", () => {
 export async function connectDatabase(): Promise<void> {
   const state = mongoose.connection.readyState;
   // Check if we already have an active connection (1 = connected, 2 = connecting)
-  if (state === 1 || state === 2) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+  if (state === ConnectionStates.connected || state === ConnectionStates.connecting) {
     return;
   }
 
@@ -59,7 +60,8 @@ export async function connectDatabase(): Promise<void> {
 
 export async function disconnectDatabase(): Promise<void> {
   const state = mongoose.connection.readyState;
-  if (state === 0) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+  if (state === ConnectionStates.disconnected) {
     return;
   }
   await mongoose.disconnect();

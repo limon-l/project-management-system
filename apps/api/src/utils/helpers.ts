@@ -4,6 +4,20 @@ import { ZodError, type ZodSchema } from "zod";
 import { Types } from "mongoose";
 import { ERROR_CODES, type ApiResponse } from "@boardflow/shared";
 
+export interface AuthenticatedUser {
+  userId: string;
+  sessionId: string;
+}
+
+/** Type-safe accessor for the authenticated user set by authMiddleware. */
+export function getRequestUser(request: { user?: AuthenticatedUser }): AuthenticatedUser {
+  const user = request.user;
+  if (!user) {
+    throw new AppError(401, ERROR_CODES.UNAUTHORIZED, "Authentication required");
+  }
+  return user;
+}
+
 export class AppError extends Error {
   constructor(
     public statusCode: number,
@@ -85,7 +99,7 @@ export function validate<T>(schema: ZodSchema<T>, data: unknown): T {
       const details: Record<string, string[]> = {};
       error.errors.forEach((err) => {
         const path = err.path.join(".");
-        if (!details[path]) details[path] = [];
+        details[path] ??= [];
         details[path].push(err.message);
       });
       throw new AppError(
@@ -109,6 +123,7 @@ export function toId<T extends Record<string, unknown>>(
   doc: T
 ): T & { id: string } {
   const raw = doc as unknown as { _id: { toString(): string } };
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- _id existence not guaranteed by generic type T
   if (!raw._id) return doc as T & { id: string };
   return { ...doc, id: raw._id.toString() };
 }
@@ -163,7 +178,7 @@ export interface ClearCookieOptions {
 
 function isSecureOrigin(): boolean {
   const isProduction = process.env.NODE_ENV === "production";
-  const corsOrigins = process.env.CORS_ORIGIN || "";
+  const corsOrigins = process.env.CORS_ORIGIN ?? "";
   const hasHttpsOrigin = corsOrigins
     .split(",")
     .some((o) => o.trim().startsWith("https://"));

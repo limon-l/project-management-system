@@ -83,11 +83,9 @@ export async function createDependency(
     .select("projectId boardId")
     .lean();
 
-  if (!blockingTask) {
-    blockingTask = await Task.findOne({ key: data.blockingTaskId, projectId: task.projectId })
-      .select("projectId boardId")
-      .lean();
-  }
+  blockingTask ??= await Task.findOne({ key: data.blockingTaskId, projectId: task.projectId })
+    .select("projectId boardId")
+    .lean();
 
   if (!blockingTask) {
     throw new AppError(404, "NOT_FOUND", "Blocking task not found");
@@ -127,24 +125,28 @@ export async function createDependency(
     .populate("blockedTaskId", "key title completed")
     .lean();
 
+  if (!populated) {
+    throw new AppError(500, "INTERNAL_ERROR", "Failed to load dependency");
+  }
+
   const result = {
-    id: populated!._id.toString(),
-    projectId: populated!.projectId.toString(),
-    blockingTaskId: populated!.blockingTaskId.toString(),
-    blockedTaskId: populated!.blockedTaskId.toString(),
+    id: populated._id.toString(),
+    projectId: populated.projectId.toString(),
+    blockingTaskId: populated.blockingTaskId.toString(),
+    blockedTaskId: populated.blockedTaskId.toString(),
     blockingTask: {
-      id: (populated!.blockingTaskId as unknown as { _id: { toString(): string } })._id.toString(),
-      key: (populated!.blockingTaskId as unknown as { key: string }).key,
-      title: (populated!.blockingTaskId as unknown as { title: string }).title,
-      completed: (populated!.blockingTaskId as unknown as { completed: boolean }).completed,
+      id: (populated.blockingTaskId as unknown as { _id: { toString(): string } })._id.toString(),
+      key: (populated.blockingTaskId as unknown as { key: string }).key,
+      title: (populated.blockingTaskId as unknown as { title: string }).title,
+      completed: (populated.blockingTaskId as unknown as { completed: boolean }).completed,
     },
     blockedTask: {
-      id: (populated!.blockedTaskId as unknown as { _id: { toString(): string } })._id.toString(),
-      key: (populated!.blockedTaskId as unknown as { key: string }).key,
-      title: (populated!.blockedTaskId as unknown as { title: string }).title,
-      completed: (populated!.blockedTaskId as unknown as { completed: boolean }).completed,
+      id: (populated.blockedTaskId as unknown as { _id: { toString(): string } })._id.toString(),
+      key: (populated.blockedTaskId as unknown as { key: string }).key,
+      title: (populated.blockedTaskId as unknown as { title: string }).title,
+      completed: (populated.blockedTaskId as unknown as { completed: boolean }).completed,
     },
-    createdAt: populated!.createdAt,
+    createdAt: populated.createdAt,
   };
 
   const projectId = task.projectId.toString();

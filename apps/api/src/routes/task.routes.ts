@@ -13,7 +13,7 @@ import {
 } from "../services/index.js";
 import { authMiddleware, authorize } from "../middleware/index.js";
 import { requireTaskAccess, requireChecklistItemAccess } from "../middleware/taskAuth.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 
 export async function taskRoutes(app: FastifyInstance): Promise<void> {
   // List project tasks
@@ -62,7 +62,7 @@ export async function taskRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
-        const task = await createTask(projectId, request.user!.userId, request.body);
+        const task = await createTask(projectId, getRequestUser(request).userId, request.body);
         sendSuccess(reply, task, 201);
       } catch (error) {
         if (error instanceof AppError) {
@@ -178,7 +178,7 @@ export async function taskRoutes(app: FastifyInstance): Promise<void> {
         const { itemId } = request.params as { itemId: string };
         const item = await updateChecklistItem(
           itemId,
-          request.user!.userId,
+          getRequestUser(request).userId,
           request.body
         );
         sendSuccess(reply, item);

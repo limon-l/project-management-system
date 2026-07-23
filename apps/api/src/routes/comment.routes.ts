@@ -7,7 +7,7 @@ import {
 } from "../services/comment.service.js";
 import { authMiddleware } from "../middleware/index.js";
 import { requireTaskAccess, requireCommentAccess } from "../middleware/taskAuth.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 
 export async function commentRoutes(app: FastifyInstance): Promise<void> {
   // Get task comments
@@ -18,8 +18,8 @@ export async function commentRoutes(app: FastifyInstance): Promise<void> {
       try {
         const { taskId } = request.params as { taskId: string };
         const { page, limit } = request.query as { page?: string; limit?: string };
-        const pageNum = Math.max(1, parseInt(page || "1", 10) || 1);
-        const limitNum = Math.min(100, Math.max(1, parseInt(limit || "50", 10) || 50));
+        const pageNum = Math.max(1, parseInt(page ?? "1", 10) || 1);
+        const limitNum = Math.min(100, Math.max(1, parseInt(limit ?? "50", 10) || 50));
         const result = await getTaskComments(taskId, pageNum, limitNum);
         sendSuccess(reply, result);
       } catch (error) {
@@ -41,7 +41,7 @@ export async function commentRoutes(app: FastifyInstance): Promise<void> {
         const { taskId } = request.params as { taskId: string };
         const comment = await createComment(
           taskId,
-          request.user!.userId,
+          getRequestUser(request).userId,
           request.body
         );
         sendSuccess(reply, comment, 201);
@@ -64,7 +64,7 @@ export async function commentRoutes(app: FastifyInstance): Promise<void> {
         const { commentId } = request.params as { commentId: string };
         const comment = await updateComment(
           commentId,
-          request.user!.userId,
+          getRequestUser(request).userId,
           request.body
         );
         sendSuccess(reply, comment);
@@ -85,7 +85,7 @@ export async function commentRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       try {
         const { commentId } = request.params as { commentId: string };
-        await deleteComment(commentId, request.user!.userId);
+        await deleteComment(commentId, getRequestUser(request).userId);
         sendSuccess(reply, { message: "Comment deleted" });
       } catch (error) {
         if (error instanceof AppError) {

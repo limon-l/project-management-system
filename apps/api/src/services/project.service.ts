@@ -45,7 +45,7 @@ export async function createProject(
     name: data.name,
     key: data.key,
     slug,
-    description: data.description || null,
+    description: data.description ?? null,
     status: "PLANNING",
   });
 

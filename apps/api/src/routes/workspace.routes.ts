@@ -13,13 +13,13 @@ import {
   changeMemberRole,
 } from "../services/index.js";
 import { authMiddleware, authorize } from "../middleware/index.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 
 export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // Create workspace
   app.post("/", { preHandler: [authMiddleware] }, async (request, reply) => {
     try {
-      const workspace = await createWorkspace(request.user!.userId, request.body);
+      const workspace = await createWorkspace(getRequestUser(request).userId, request.body);
       sendSuccess(reply, workspace, 201);
     } catch (error) {
       if (error instanceof AppError) {
@@ -33,7 +33,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // List user's workspaces
   app.get("/", { preHandler: [authMiddleware] }, async (request, reply) => {
     try {
-      const workspaces = await getUserWorkspaces(request.user!.userId);
+      const workspaces = await getUserWorkspaces(getRequestUser(request).userId);
       sendSuccess(reply, workspaces);
     } catch (error) {
       if (error instanceof AppError) {
@@ -48,7 +48,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.get("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
-      const workspace = await getWorkspaceById(workspaceId, request.user!.userId);
+      const workspace = await getWorkspaceById(workspaceId, getRequestUser(request).userId);
       sendSuccess(reply, workspace);
     } catch (error) {
       if (error instanceof AppError) {
@@ -63,7 +63,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.patch("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
-      const workspace = await updateWorkspace(workspaceId, request.user!.userId, request.body);
+      const workspace = await updateWorkspace(workspaceId, getRequestUser(request).userId, request.body);
       sendSuccess(reply, workspace);
     } catch (error) {
       if (error instanceof AppError) {
@@ -78,7 +78,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.delete("/:workspaceId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
-      const result = await deleteWorkspace(workspaceId, request.user!.userId);
+      const result = await deleteWorkspace(workspaceId, getRequestUser(request).userId);
       sendSuccess(reply, result);
     } catch (error) {
       if (error instanceof AppError) {
@@ -108,7 +108,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.post("/:workspaceId/invitations", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId } = request.params as { workspaceId: string };
-      const invitation = await inviteMember(workspaceId, request.user!.userId, request.body);
+      const invitation = await inviteMember(workspaceId, getRequestUser(request).userId, request.body);
       sendSuccess(reply, invitation, 201);
     } catch (error) {
       if (error instanceof AppError) {
@@ -138,7 +138,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.post("/invitations/:invitationId/respond", { preHandler: [authMiddleware] }, async (request, reply) => {
     try {
       const { invitationId } = request.params as { invitationId: string };
-      const result = await respondToInvitation(invitationId, request.user!.userId, request.body);
+      const result = await respondToInvitation(invitationId, getRequestUser(request).userId, request.body);
       sendSuccess(reply, result);
     } catch (error) {
       if (error instanceof AppError) {
@@ -153,7 +153,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   app.delete("/:workspaceId/members/:memberId", { preHandler: [authMiddleware, authorize({ requireWorkspace: true, minimumWorkspaceRole: "WORKSPACE_ADMIN" })] }, async (request, reply) => {
     try {
       const { workspaceId, memberId } = request.params as { workspaceId: string; memberId: string };
-      await removeMember(workspaceId, memberId, request.user!.userId);
+      await removeMember(workspaceId, memberId, getRequestUser(request).userId);
       sendSuccess(reply, { message: "Member removed" });
     } catch (error) {
       if (error instanceof AppError) {
@@ -169,7 +169,7 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
     try {
       const { workspaceId, memberId } = request.params as { workspaceId: string; memberId: string };
       const { role } = request.body as { role: string };
-      await changeMemberRole(workspaceId, memberId, role as "WORKSPACE_ADMIN" | "PROJECT_MEMBER" | "VIEWER", request.user!.userId);
+      await changeMemberRole(workspaceId, memberId, role as "WORKSPACE_ADMIN" | "PROJECT_MEMBER" | "VIEWER", getRequestUser(request).userId);
       sendSuccess(reply, { message: "Role updated" });
     } catch (error) {
       if (error instanceof AppError) {

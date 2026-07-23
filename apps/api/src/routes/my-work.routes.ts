@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { Task } from "../models/index.js";
 import { authMiddleware } from "../middleware/index.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 import { getUserAssignedTasks } from "../services/index.js";
 
 export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
@@ -11,7 +11,7 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       try {
-        const tasks = await getUserAssignedTasks(request.user!.userId);
+        const tasks = await getUserAssignedTasks(getRequestUser(request).userId);
         sendSuccess(reply, tasks);
       } catch (error) {
         if (error instanceof AppError) {
@@ -28,7 +28,7 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       try {
-        const userId = request.user!.userId;
+        const userId = getRequestUser(request).userId;
         const { groupBy } = request.query as {
           groupBy?: "project" | "dueDate" | "priority";
         };
@@ -77,7 +77,7 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
           const grouped: Record<string, typeof tasks> = {};
           for (const t of tasks) {
             const pid = t.projectId;
-            if (!grouped[pid]) grouped[pid] = [];
+            grouped[pid] ??= [];
             grouped[pid].push(t);
           }
           sendSuccess(reply, { tasks, groups: grouped });
@@ -105,12 +105,8 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
             if (t.completed) {
               grouped.completed.push(t);
             } else {
-              const arr = grouped[t.priority];
-              if (arr) {
-                arr.push(t);
-              } else {
-                grouped[t.priority] = [t];
-              }
+              grouped[t.priority] ??= [];
+              grouped[t.priority].push(t);
             }
           }
           sendSuccess(reply, { tasks, groups: grouped });
@@ -133,7 +129,7 @@ export async function myWorkRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       try {
-        const userId = request.user!.userId;
+        const userId = getRequestUser(request).userId;
         const now = new Date();
         const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 

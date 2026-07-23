@@ -16,6 +16,7 @@ import {
   getCookieOptions,
   getClearCookieOptions,
   createSocketToken,
+  getRequestUser,
 } from "../utils/helpers.js";
 import { logger } from "../utils/logger.js";
 
@@ -57,8 +58,8 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       try {
         const result = await login(
           request.body,
-          request.headers["user-agent"] || "",
-          request.ip || ""
+          request.headers["user-agent"] ?? "",
+          request.ip ?? ""
         );
         reply.setCookie("session", result.sessionToken, getCookieOptions());
         sendSuccess(reply, { user: result.user });
@@ -89,7 +90,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       try {
-        const sessionToken = request.cookies?.session;
+        const sessionToken = request.cookies.session;
         if (sessionToken) {
           await logout(sessionToken);
         }
@@ -111,7 +112,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       try {
-        const user = await getCurrentUser(request.user!.userId);
+        const user = await getCurrentUser(getRequestUser(request).userId);
         sendSuccess(reply, { user });
       } catch (error) {
         if (error instanceof AppError) {
@@ -129,8 +130,8 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       sendSuccess(reply, {
         token: createSocketToken(
-          request.user!.userId,
-          request.user!.sessionId
+          getRequestUser(request).userId,
+          getRequestUser(request).sessionId
         ),
       });
     }

@@ -16,7 +16,7 @@ import {
   deleteLabel,
 } from "../services/index.js";
 import { authMiddleware, authorize } from "../middleware/index.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 
 export async function projectRoutes(app: FastifyInstance): Promise<void> {
   // Create project
@@ -28,7 +28,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
         const { workspaceId } = request.params as { workspaceId: string };
         const project = await createProject(
           workspaceId,
-          request.user!.userId,
+          getRequestUser(request).userId,
           request.body
         );
         sendSuccess(reply, project, 201);
@@ -125,7 +125,7 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       try {
         const { projectId } = request.params as { projectId: string };
-        await deleteProject(projectId, request.user!.userId);
+        await deleteProject(projectId, getRequestUser(request).userId);
         sendSuccess(reply, { message: "Project deleted" });
       } catch (error) {
         if (error instanceof AppError) {

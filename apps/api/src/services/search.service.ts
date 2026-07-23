@@ -23,7 +23,7 @@ function escapeRegex(str: string): string {
 export async function searchWorkspace(opts: SearchOptions) {
   const { workspaceId, query, type, page = 1, limit = 20 } = opts;
   const skip = (page - 1) * limit;
-  const textQuery = query?.trim() || "";
+  const textQuery = query.trim() || "";
 
   const results: {
     tasks?: unknown[];

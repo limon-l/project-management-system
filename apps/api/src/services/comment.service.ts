@@ -65,25 +65,29 @@ export async function createComment(
     .populate("authorId", "name avatarUrl")
     .lean();
 
-  const author = populated!.authorId as unknown as {
+  if (!populated) {
+    throw new AppError(500, "INTERNAL_ERROR", "Failed to load comment");
+  }
+
+  const author = populated.authorId as unknown as {
     _id: { toString(): string };
     name: string;
     avatarUrl: string | null;
   };
 
   const result = {
-    id: populated!._id.toString(),
-    taskId: populated!.taskId.toString(),
+    id: populated._id.toString(),
+    taskId: populated.taskId.toString(),
     authorId: author._id.toString(),
     author: {
       id: author._id.toString(),
       name: author.name,
       avatarUrl: author.avatarUrl,
     },
-    content: populated!.content,
-    edited: populated!.edited,
-    createdAt: populated!.createdAt,
-    updatedAt: populated!.updatedAt,
+    content: populated.content,
+    edited: populated.edited,
+    createdAt: populated.createdAt,
+    updatedAt: populated.updatedAt,
   };
 
   const taskDoc = await Task.findById(taskId).select("projectId").lean();
@@ -155,25 +159,29 @@ export async function updateComment(
     .populate("authorId", "name avatarUrl")
     .lean();
 
-  const author = populated!.authorId as unknown as {
+  if (!populated) {
+    throw new AppError(500, "INTERNAL_ERROR", "Failed to load comment");
+  }
+
+  const author = populated.authorId as unknown as {
     _id: { toString(): string };
     name: string;
     avatarUrl: string | null;
   };
 
   const result = {
-    id: populated!._id.toString(),
-    taskId: populated!.taskId.toString(),
+    id: populated._id.toString(),
+    taskId: populated.taskId.toString(),
     authorId: author._id.toString(),
     author: {
       id: author._id.toString(),
       name: author.name,
       avatarUrl: author.avatarUrl,
     },
-    content: populated!.content,
-    edited: populated!.edited,
-    createdAt: populated!.createdAt,
-    updatedAt: populated!.updatedAt,
+    content: populated.content,
+    edited: populated.edited,
+    createdAt: populated.createdAt,
+    updatedAt: populated.updatedAt,
   };
 
   if (projectId) {

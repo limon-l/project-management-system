@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import mongoose from "mongoose";
+import mongoose, { ConnectionStates } from "mongoose";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { authRoutes } from "./auth.routes.js";
@@ -29,7 +29,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
   // Serve uploaded files in development with path traversal protection
   if (process.env.NODE_ENV !== "production") {
-    const uploadDir = path.resolve(process.env.UPLOAD_DIR || "./uploads");
+    const uploadDir = path.resolve(process.env.UPLOAD_DIR ?? "./uploads");
     app.get("/uploads/:filepath*", async (request, reply) => {
       const params = request.params as { filepath: string };
       const resolved = path.resolve(uploadDir, params.filepath);
@@ -48,7 +48,8 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
   // Health check
   app.get("/api/health", async (_request, reply) => {
-    const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+    const dbStatus = mongoose.connection.readyState === ConnectionStates.connected ? "connected" : "disconnected";
     const status = dbStatus === "connected" ? "ok" : "error";
     reply.status(status === "ok" ? 200 : 503).send({
       status,

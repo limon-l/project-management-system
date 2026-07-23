@@ -29,7 +29,7 @@ export async function searchRoutes(app: FastifyInstance): Promise<void> {
 
         const results = await searchWorkspace({
           workspaceId,
-          query: query.q || "",
+          query: query.q ?? "",
           type: query.type,
           assigneeId: query.assigneeId,
           priority: query.priority,
@@ -38,8 +38,8 @@ export async function searchRoutes(app: FastifyInstance): Promise<void> {
           dueDateTo: query.dueDateTo,
           completed: query.completed !== undefined ? query.completed === "true" : undefined,
           columnId: query.columnId,
-          page: Math.max(1, parseInt(query.page || "1", 10) || 1),
-          limit: Math.min(100, Math.max(1, parseInt(query.limit || "20", 10) || 20)),
+          page: Math.max(1, parseInt(query.page ?? "1", 10) || 1),
+          limit: Math.min(100, Math.max(1, parseInt(query.limit ?? "20", 10) || 20)),
         });
 
         sendSuccess(reply, results);

@@ -23,8 +23,8 @@ export async function createNotification(params: CreateNotificationParams) {
     type: params.type,
     entityType: params.entityType,
     entityId: params.entityId,
-    projectId: params.projectId || null,
-    workspaceId: params.workspaceId || null,
+    projectId: params.projectId ?? null,
+    workspaceId: params.workspaceId ?? null,
     message: params.message,
   });
 
@@ -41,7 +41,7 @@ export async function createNotification(params: CreateNotificationParams) {
       notification: {
         id: populated._id.toString(),
         recipientId: populated.recipientId.toString(),
-        actorId: actor?._id?.toString() ?? null,
+        actorId: actor?._id.toString() ?? null,
         actor: actor
           ? { id: actor._id.toString(), name: actor.name, avatarUrl: actor.avatarUrl }
           : undefined,
@@ -85,7 +85,7 @@ export async function getNotifications(
     return {
       id: n._id.toString(),
       recipientId: n.recipientId.toString(),
-      actorId: actor?._id?.toString() ?? null,
+      actorId: actor?._id.toString() ?? null,
       actor: actor
         ? { id: actor._id.toString(), name: actor.name, avatarUrl: actor.avatarUrl }
         : undefined,

@@ -51,19 +51,20 @@ class LocalStorage implements StorageBackend {
 }
 
 class S3Storage implements StorageBackend {
-  private s3!: import("@aws-sdk/client-s3").S3Client;
+  private s3: import("@aws-sdk/client-s3").S3Client | undefined;
   private bucket: string;
   private publicUrl: string;
   private region: string;
 
   constructor() {
     const env = getEnv();
-    this.bucket = env.S3_BUCKET || "";
-    this.publicUrl = (env.S3_PUBLIC_URL || "").replace(/\/$/, "");
+    this.bucket = env.S3_BUCKET ?? "";
+    this.publicUrl = (env.S3_PUBLIC_URL ?? "").replace(/\/$/, "");
     this.region = env.S3_REGION;
   }
 
   private async getClient(): Promise<import("@aws-sdk/client-s3").S3Client> {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- lazy initialization; field starts undefined despite definite assignment assertion
     if (!this.s3) {
       const { S3Client } = await import("@aws-sdk/client-s3");
       const env = getEnv();
@@ -71,8 +72,8 @@ class S3Storage implements StorageBackend {
         endpoint: env.S3_ENDPOINT,
         region: this.region,
         credentials: {
-          accessKeyId: env.S3_ACCESS_KEY_ID || "",
-          secretAccessKey: env.S3_SECRET_ACCESS_KEY || "",
+          accessKeyId: env.S3_ACCESS_KEY_ID ?? "",
+          secretAccessKey: env.S3_SECRET_ACCESS_KEY ?? "",
         },
         forcePathStyle: true,
       });

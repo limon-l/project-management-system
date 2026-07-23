@@ -1,12 +1,9 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { Session } from "../models/index.js";
-import { sendError, getClearCookieOptions } from "../utils/helpers.js";
+import { sendError, getClearCookieOptions, type AuthenticatedUser } from "../utils/helpers.js";
 import { ERROR_CODES } from "@boardflow/shared";
 
-export interface AuthenticatedUser {
-  userId: string;
-  sessionId: string;
-}
+export type { AuthenticatedUser };
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -18,7 +15,7 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  const sessionToken = request.cookies?.session;
+  const sessionToken = request.cookies.session;
 
   if (!sessionToken) {
     sendError(reply, 401, ERROR_CODES.UNAUTHORIZED, "Authentication required");

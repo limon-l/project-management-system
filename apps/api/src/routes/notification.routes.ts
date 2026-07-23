@@ -5,7 +5,7 @@ import {
   markNotificationsRead,
 } from "../services/notification.service.js";
 import { authMiddleware } from "../middleware/index.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 
 export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   // Get notifications
@@ -15,9 +15,9 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       try {
         const { page, limit } = request.query as { page?: string; limit?: string };
-        const pageNum = Math.max(1, parseInt(page || "1", 10) || 1);
-        const limitNum = Math.min(100, Math.max(1, parseInt(limit || "20", 10) || 20));
-        const result = await getNotifications(request.user!.userId, pageNum, limitNum);
+        const pageNum = Math.max(1, parseInt(page ?? "1", 10) || 1);
+        const limitNum = Math.min(100, Math.max(1, parseInt(limit ?? "20", 10) || 20));
+        const result = await getNotifications(getRequestUser(request).userId, pageNum, limitNum);
         sendSuccess(reply, result);
       } catch (error) {
         if (error instanceof AppError) {
@@ -36,7 +36,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       try {
         const count = await Notification.countDocuments({
-          recipientId: request.user!.userId,
+          recipientId: getRequestUser(request).userId,
           read: false,
         });
         sendSuccess(reply, { count });
@@ -56,10 +56,10 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [authMiddleware] },
     async (request, reply) => {
       try {
-        const { notificationIds } = (request.body || {}) as {
+        const { notificationIds } = (request.body ?? {}) as {
           notificationIds?: string[];
         };
-        await markNotificationsRead(request.user!.userId, notificationIds);
+        await markNotificationsRead(getRequestUser(request).userId, notificationIds);
         sendSuccess(reply, { message: "Notifications marked as read" });
       } catch (error) {
         if (error instanceof AppError) {

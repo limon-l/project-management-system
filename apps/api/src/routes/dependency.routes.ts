@@ -6,7 +6,7 @@ import {
 } from "../services/dependency.service.js";
 import { authMiddleware } from "../middleware/index.js";
 import { requireTaskAccess } from "../middleware/taskAuth.js";
-import { sendSuccess, sendError, AppError } from "../utils/helpers.js";
+import { sendSuccess, sendError, AppError, getRequestUser } from "../utils/helpers.js";
 
 export async function dependencyRoutes(app: FastifyInstance): Promise<void> {
   app.get(
@@ -42,7 +42,7 @@ export async function dependencyRoutes(app: FastifyInstance): Promise<void> {
         const { taskId } = request.params as { taskId: string };
         const dependency = await createDependency(
           taskId,
-          request.user!.userId,
+          getRequestUser(request).userId,
           request.body
         );
         sendSuccess(reply, dependency, 201);
@@ -64,7 +64,7 @@ export async function dependencyRoutes(app: FastifyInstance): Promise<void> {
         const { dependencyId } = request.params as { dependencyId: string };
         const result = await deleteDependency(
           dependencyId,
-          request.user!.userId
+          getRequestUser(request).userId
         );
         sendSuccess(reply, result);
       } catch (error) {

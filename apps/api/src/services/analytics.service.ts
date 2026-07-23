@@ -57,7 +57,7 @@ export async function getWorkspaceAnalytics(workspaceId: string) {
 
   for (const t of tasks) {
     statusCounts[t.completed ? "completed" : "incomplete"] =
-      (statusCounts[t.completed ? "completed" : "incomplete"] || 0) + 1;
+      (statusCounts[t.completed ? "completed" : "incomplete"] ?? 0) + 1;
     if (!t.completed) {
       priorityCounts[t.priority] = (priorityCounts[t.priority] || 0) + 1;
     }
@@ -106,7 +106,7 @@ export async function getWorkspaceAnalytics(workspaceId: string) {
       taskId: t._id.toString(),
       taskKey: t.key,
       title: t.title,
-      dueDate: t.dueDate?.toISOString() || "",
+      dueDate: t.dueDate?.toISOString() ?? "",
     })),
     recentActivity,
   };
@@ -139,11 +139,11 @@ export async function getProjectAnalytics(projectId: string) {
     }
     for (const aid of t.assigneeIds) {
       const id = aid.toString();
-      byAssignee.set(id, (byAssignee.get(id) || 0) + 1);
+      byAssignee.set(id, (byAssignee.get(id) ?? 0) + 1);
     }
     for (const lid of t.labelIds) {
       const id = lid.toString();
-      byLabel.set(id, (byLabel.get(id) || 0) + 1);
+      byLabel.set(id, (byLabel.get(id) ?? 0) + 1);
     }
   }
 
@@ -156,7 +156,7 @@ export async function getProjectAnalytics(projectId: string) {
       (m) => m.userId.toString() === userId
     );
     const u = member?.userId as unknown as { name: string } | undefined;
-    return { userId, name: u?.name || "Unknown", taskCount: count };
+    return { userId, name: u?.name ?? "Unknown", taskCount: count };
   }).sort((a, b) => b.taskCount - a.taskCount);
 
   return {

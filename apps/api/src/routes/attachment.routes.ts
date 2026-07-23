@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../middleware/index.js";
 import { requireTaskAccess, requireAttachmentAccess } from "../middleware/taskAuth.js";
-import { sendSuccess, AppError, sendError } from "../utils/helpers.js";
+import { sendSuccess, AppError, sendError, getRequestUser } from "../utils/helpers.js";
 import {
   uploadAttachment,
   getTaskAttachments,
@@ -45,7 +45,7 @@ export async function attachmentRoutes(app: FastifyInstance): Promise<void> {
         const buffer = await data.toBuffer();
         const attachment = await uploadAttachment(
           taskId,
-          request.user!.userId,
+          getRequestUser(request).userId,
           buffer,
           data.filename,
           data.mimetype
@@ -69,7 +69,7 @@ export async function attachmentRoutes(app: FastifyInstance): Promise<void> {
     async (request, reply) => {
       try {
         const { id } = request.params as { id: string };
-        await deleteAttachment(id, request.user!.userId);
+        await deleteAttachment(id, getRequestUser(request).userId);
         sendSuccess(reply, { message: "Attachment deleted" });
       } catch (error) {
         if (error instanceof AppError) {
